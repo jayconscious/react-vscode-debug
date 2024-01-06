@@ -54,6 +54,7 @@
   /**
    * Keeps track of the current dispatcher.
    */
+  // TODO: react中的 dispatcher 是啥？
   var ReactCurrentDispatcher = {
     /**
      * @internal
@@ -229,7 +230,7 @@
    * This is the abstract API for an update queue.
    */
 
-
+  // TODO: 
   var ReactNoopUpdateQueue = {
     /**
      * Checks whether or not this composite component is mounted.
@@ -314,6 +315,7 @@
     this.refs = emptyObject; // We initialize the default updater but the real one gets injected by the
     // renderer.
 
+    // TODO: updater 是啥？
     this.updater = updater || ReactNoopUpdateQueue;
   }
 
@@ -344,6 +346,7 @@
    * @protected
    */
 
+  // TODO:  setState
   Component.prototype.setState = function (partialState, callback) {
     if (typeof partialState !== 'object' && typeof partialState !== 'function' && partialState != null) {
       throw new Error('setState(...): takes an object of state variables to update or a ' + 'function which returns an object of state variables.');
@@ -428,6 +431,9 @@
     };
 
     {
+      // Object.seal() 静态方法密封一个对象。密封一个对象会阻止其扩展并且使得现有属性不可配置。
+      // 密封对象有一组固定的属性：不能添加新属性、不能删除现有属性或更改其可枚举性和可配置性、不能重新分配其原型。
+      // 只要现有属性的值是可写的，它们仍然可以更改。seal() 返回传入的同一对象。
       Object.seal(refObject);
     }
 
@@ -1241,6 +1247,7 @@
     return children;
   }
 
+  // TODO: 
   function createContext(defaultValue) {
     // TODO: Second argument used to be an optional `calculateChangedBits`
     // function. Warn to reserve for future use?
@@ -1614,7 +1621,8 @@
     return dispatcher.getCacheSignal();
   }
   function getCacheForType(resourceType) {
-    var dispatcher = resolveDispatcher(); // $FlowFixMe This is unstable, thus optional
+    // $FlowFixMe This is unstable, thus optional
+    var dispatcher = resolveDispatcher(); 
 
     return dispatcher.getCacheForType(resourceType);
   }
@@ -1624,8 +1632,11 @@
     {
       // TODO: add a more generic warning for invalid values.
       if (Context._context !== undefined) {
-        var realContext = Context._context; // Don't deduplicate because this legitimately causes bugs
+        // TODO: realContext 是啥？
+        var realContext = Context._context; 
+        // Don't deduplicate because this legitimately causes bugs
         // and nobody should be using this in existing code.
+        // 不要进行重复数据删除，因为这会合理地导致错误，并且任何人都不应该在现有代码中使用它。
 
         if (realContext.Consumer === Context) {
           error('Calling useContext(Context.Consumer) is not supported, may cause bugs, and will be ' + 'removed in a future major release. Did you mean to call useContext(Context) instead?');

@@ -12321,6 +12321,7 @@
     return 32 - clz32(number);
   }
 
+  //  - 优先级大于 << , 如果id = 3, 先 3 - 1 = 2，即1左移两位，100 => 4 (二进制转十进制)
   function getLeadingBit(id) {
     return 1 << getBitLength(id) - 1;
   }
@@ -14489,6 +14490,7 @@
     }
   }
 
+  // TODO: 将 classComponentUpdater 挂载到组件实例的 updater 上
   function adoptClassInstance(workInProgress, instance) {
     instance.updater = classComponentUpdater;
     workInProgress.stateNode = instance; // The instance needs access to the fiber so that it can schedule updates
@@ -14500,6 +14502,7 @@
     }
   }
 
+  // TODO: 给实例注射
   function constructClassInstance(workInProgress, ctor, props) {
     var isLegacyContextConsumer = false;
     var unmaskedContext = emptyContextObject;
