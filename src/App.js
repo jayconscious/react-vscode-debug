@@ -1,14 +1,22 @@
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import "./App.css";
-import DemoUseContext from './components/DemoUseContext';
+// import DemoUseContext from './components/DemoUseContext';
 
-
-
-export default function MyApp() {
-  const [theme, setTheme] = useState("dark");
+// const header = React.createElement(
+//   "header",
+//   null,
+//   React.createElement("h1", null, "Mozilla Developer Network"),
+// );
+// console.log('header', header.type())
+export default function App() {
+  const len = 3000;
   return (
-    <DemoUseContext></DemoUseContext>
-  )
-   
+    <ul>
+      {Array(len)
+        .fill(0)
+        .map((_, i) => (
+          <li>{i}</li>
+        ))}
+    </ul>
+  );
 }
-

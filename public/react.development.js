@@ -73,6 +73,7 @@
 
   var ReactCurrentActQueue = {
     current: null,
+    // 用于在旧模式下重现“batchedUpdates”的行为。
     // Used to reproduce behavior of `batchedUpdates` in legacy mode.
     isBatchingLegacy: false,
     didScheduleLegacyUpdate: false
@@ -737,6 +738,7 @@
    */
 
 
+  // Tip: ReactElement 
   var ReactElement = function (type, key, ref, self, source, owner, props) {
     var element = {
       // This tag allows us to uniquely identify this as a React Element
@@ -889,13 +891,16 @@
    * See https://reactjs.org/docs/react-api.html#cloneelement
    */
 
+  // Tip: cloneElement 
   function cloneElement(element, config, children) {
     if (element === null || element === undefined) {
       throw new Error("React.cloneElement(...): The argument must be a React element, but you passed " + element + ".");
     }
 
+    // 原来的props都是复制的
     var propName; // Original props are copied
 
+    //  提取保留名称
     var props = assign({}, element.props); // Reserved names are extracted
 
     var key = element.key;
@@ -950,6 +955,7 @@
     if (childrenLength === 1) {
       props.children = children;
     } else if (childrenLength > 1) {
+      // 初始化空数组，TODO: 这么做有什么好处?
       var childArray = Array(childrenLength);
 
       for (var i = 0; i < childrenLength; i++) {

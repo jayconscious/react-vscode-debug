@@ -28004,6 +28004,8 @@
   /** @noinline */
 
 
+  // Tip: 我们可以看见，更新工作从递归变成了可以中断的循环过程。
+  // 每次循环都会调用shouldYield判断当前是否有剩余时间。
   function workLoopConcurrent() {
     // Perform work until Scheduler asks us to yield
     while (workInProgress !== null && !shouldYield()) {
@@ -29550,8 +29552,9 @@
     this.key = key;
     this.elementType = null;
     this.type = null;
-    this.stateNode = null; // Fiber
-
+    this.stateNode = null; // 真实的Dom节点
+    
+    // Fiber
     this.return = null;
     this.child = null;
     this.sibling = null;
@@ -29562,8 +29565,9 @@
     this.updateQueue = null;
     this.memoizedState = null;
     this.dependencies = null;
-    this.mode = mode; // Effects
-
+    this.mode = mode; 
+    
+    // Effects
     this.flags = NoFlags;
     this.subtreeFlags = NoFlags;
     this.deletions = null;
@@ -31337,6 +31341,7 @@
     return unstable_renderSubtreeIntoContainer(parentComponent, element, containerNode, callback);
   }
 
+  // Tip: 这是啥？
   var Internals = {
     usingClientEntryPoint: false,
     // Keep in sync with ReactTestUtils.js.
