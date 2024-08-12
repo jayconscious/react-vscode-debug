@@ -320,6 +320,7 @@
     this.updater = updater || ReactNoopUpdateQueue;
   }
 
+  // Tip: 标记是react Component
   Component.prototype.isReactComponent = {};
   /**
    * Sets a subset of the state. Always use this to mutate

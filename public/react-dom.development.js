@@ -27155,6 +27155,7 @@
   // goes through Scheduler.
 
 
+  // Tip: render阶段，Concurrent 并发的，就是异步
   function performConcurrentWorkOnRoot(root, didTimeout) {
     {
       resetNestedUpdateFlag();
@@ -27530,6 +27531,7 @@
   // through Scheduler
 
 
+  // Tip: render阶段的起始，同步
   function performSyncWorkOnRoot(root) {
     {
       syncNestedUpdateFlag();
@@ -30126,6 +30128,7 @@
     return target;
   }
 
+  // Tip: 整个应用的根节点，不是 <App/> 所在的那一层，是之上的那一层。
   function FiberRootNode(containerInfo, tag, hydrate, identifierPrefix, onRecoverableError) {
     this.tag = tag;
     this.containerInfo = containerInfo;
@@ -30169,6 +30172,7 @@
     }
 
     {
+      // TODO: 这是干啥？
       this.memoizedUpdaters = new Set();
       var pendingUpdatersLaneMap = this.pendingUpdatersLaneMap = [];
 
@@ -30190,15 +30194,18 @@
     }
   }
 
+  // Tip: 创个整个fiber根节点
   function createFiberRoot(containerInfo, tag, hydrate, initialChildren, hydrationCallbacks, isStrictMode, concurrentUpdatesByDefaultOverride, // TODO: We have several of these arguments that are conceptually part of the
   // host config, but because they are passed in at runtime, we have to thread
   // them through the root constructor. Perhaps we should put them all into a
   // single type, like a DynamicHostConfig that is defined by the renderer.
   identifierPrefix, onRecoverableError, transitionCallbacks) {
+    // 
     var root = new FiberRootNode(containerInfo, tag, hydrate, identifierPrefix, onRecoverableError);
     // stateNode is any.
 
 
+    // Tip: 没有初始化的fiber，第一次没有渲染，所以是空的fiber节点
     var uninitializedFiber = createHostRootFiber(tag, isStrictMode);
     root.current = uninitializedFiber;
     uninitializedFiber.stateNode = root;
@@ -30358,6 +30365,8 @@
     scheduleInitialHydrationOnRoot(root, lane, eventTime);
     return root;
   }
+  
+  // Tip: 更新方法
   function updateContainer(element, container, parentComponent, callback) {
     {
       onScheduleRoot(container, element);
@@ -30414,6 +30423,7 @@
 
     return lane;
   }
+  
   function getPublicRootInstance(container) {
     var containerFiber = container.current;
 
@@ -30831,10 +30841,12 @@
     console['error'](error);
   };
 
+  // Tip: 保存在这里？
   function ReactDOMRoot(internalRoot) {
     this._internalRoot = internalRoot;
   }
 
+  // 渲染方法？
   ReactDOMHydrationRoot.prototype.render = ReactDOMRoot.prototype.render = function (children) {
     var root = this._internalRoot;
 
@@ -30893,7 +30905,9 @@
     }
   };
 
+  // Tip: 
   function createRoot(container, options) {
+    // debugger
     if (!isValidContainer(container)) {
       throw new Error('createRoot(...): Target container is not a DOM element.');
     }
@@ -30933,6 +30947,7 @@
       }
     }
 
+    // fiberRootNode 节点，它被保存在哪里？
     var root = createContainer(container, ConcurrentRoot, null, isStrictMode, concurrentUpdatesByDefaultOverride, identifierPrefix, onRecoverableError);
     markContainerAsRoot(root.current, container);
     var rootContainerElement = container.nodeType === COMMENT_NODE ? container.parentNode : container;
