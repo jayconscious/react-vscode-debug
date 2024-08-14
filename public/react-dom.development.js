@@ -15521,6 +15521,7 @@
       return knownKeys;
     }
 
+    // start
     function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren, lanes) {
       // This algorithm can't optimize by searching from both ends since we
       // don't have backpointers on fibers. I'm trying to see how far we can get
@@ -15644,8 +15645,12 @@
       } // Add all children to a key map for quick lookups.
 
 
-      var existingChildren = mapRemainingChildren(returnFiber, oldFiber); // Keep scanning and use the map to restore deleted items as moves.
-
+      // oldFiber 存入以 key为key，oldFiber为value的Map中。
+      var existingChildren = mapRemainingChildren(returnFiber, oldFiber); 
+      // console.log('existingChildren', existingChildren)
+      
+      // Keep scanning and use the map to restore deleted items as moves.
+      // newChildren 和 oldFiber 都没有遍历完的情况
       for (; newIdx < newChildren.length; newIdx++) {
         var _newFiber2 = updateFromMap(existingChildren, returnFiber, newIdx, newChildren[newIdx], lanes);
 
@@ -15686,7 +15691,7 @@
       }
 
       return resultingFirstChild;
-    }
+    } // end
 
     function reconcileChildrenIterator(returnFiber, currentFirstChild, newChildrenIterable, lanes) {
       // This is the same implementation as reconcileChildrenArray(),
@@ -15902,13 +15907,16 @@
       return created;
     }
 
+    // TODO: 做了哪些事情？
     function reconcileSingleElement(returnFiber, currentFirstChild, element, lanes) {
-      var key = element.key;
+      var key = element.key; // element 即 newChild
       var child = currentFirstChild;
 
+      // 判断 上次是否有Dom节点存在
       while (child !== null) {
         // TODO: If key === null and child.key === null, then this only applies to
         // the first item in the list.
+        // 节点是否可以服用，有限比较 key 是否相同？
         if (child.key === key) {
           var elementType = element.type;
 
@@ -15926,6 +15934,7 @@
               return existing;
             }
           } else {
+            // type 相同
             if (child.elementType === elementType || ( // Keep this check inline so it only runs on the false path:
              isCompatibleFamilyForHotReloading(child, element) ) || // Lazy types should reconcile their resolved type.
             // We need to do this after the Hot Reloading check above,
@@ -15944,14 +15953,22 @@
                 _existing._debugOwner = element._owner;
               }
 
+              // 返回这个复用的节点
               return _existing;
             }
           } // Didn't match.
 
+          // 将该fiber及其兄弟fiber标记为删除
+          // 当child !== null 且 key相同且type不同时
+          // 执行 deleteRemainingChildren 将 child及其兄弟fiber都标记删除
 
+          // 这是什么场景下面的 case ？
           deleteRemainingChildren(returnFiber, child);
+          // 整块的内容替换 case，比如整片 li，全部被替换为 其他的节点，比如p
+          // key 都为 0 ，但是type不同，后续的比较也没有意思，这在我们页面交互中，也是较多存在的。
           break;
         } else {
+          // 当child !== null且key不同时仅将child标记删除。
           deleteChild(returnFiber, child);
         }
 
@@ -15963,6 +15980,7 @@
         created.return = returnFiber;
         return created;
       } else {
+        // 创建新的 fiber 节点
         var _created4 = createFiberFromElement(element, returnFiber.mode, lanes);
 
         _created4.ref = coerceRef(returnFiber, currentFirstChild, element);
@@ -16004,7 +16022,8 @@
 
 
     function reconcileChildFibers(returnFiber, currentFirstChild, newChild, lanes) {
-      // This function is not recursive.
+      // This function is not recursive. 这个函数不是递归的
+
       // If the top level item is an array, we treat it as a set of children,
       // not as a fragment. Nested arrays on the other hand will be treated as
       // fragment nodes. Recursion happens at the normal flow.
@@ -16018,6 +16037,8 @@
       } // Handle object types
 
 
+      // TODO: newChild 是啥？看上去像个标准的 react元素，因为有这个 $$typeof 玩意，ReactElement 才会带有
+      // jsx 对象？
       if (typeof newChild === 'object' && newChild !== null) {
         switch (newChild.$$typeof) {
           case REACT_ELEMENT_TYPE:
@@ -16033,6 +16054,7 @@
             return reconcileChildFibers(returnFiber, currentFirstChild, init(payload), lanes);
         }
 
+        // 多个节点的情况
         if (isArray(newChild)) {
           return reconcileChildrenArray(returnFiber, currentFirstChild, newChild, lanes);
         }
@@ -16044,6 +16066,7 @@
         throwOnInvalidObjectType(returnFiber, newChild);
       }
 
+      // 这里对于 string，number 都是单个节点，对应一种处理方式
       if (typeof newChild === 'string' && newChild !== '' || typeof newChild === 'number') {
         return placeSingleChild(reconcileSingleTextNode(returnFiber, currentFirstChild, '' + newChild, lanes));
       }
@@ -19777,7 +19800,7 @@
       // If we had any progressed work already, that is invalid at this point so
       // let's throw it out.
 
-      // diff 阶段
+      // TODO: diff 阶段
       workInProgress.child = reconcileChildFibers(workInProgress, current.child, nextChildren, renderLanes);
     }
   }
@@ -24106,6 +24129,8 @@
     }
   }
 
+  // TODO: 这个函数除了去更新dom还干了些啥？
+  // 执行useLayoutEffect的回调函数 ?
   function commitHookEffectListMount(flags, finishedWork) {
     var updateQueue = finishedWork.updateQueue;
     var lastEffect = updateQueue !== null ? updateQueue.lastEffect : null;
@@ -24151,7 +24176,7 @@
 
           {
             var destroy = effect.destroy;
-
+            // TODO: hookName 是在哪里被调用到了？
             if (destroy !== undefined && typeof destroy !== 'function') {
               var hookName = void 0;
 
@@ -24262,6 +24287,7 @@
   function commitClassLayoutLifecycles(finishedWork, current) {
     var instance = finishedWork.stateNode;
 
+    // mount 阶段
     if (current === null) {
       // We could update instance props and state here,
       // but instead we rely on them being set during last render.
@@ -24441,6 +24467,7 @@
         {
           recursivelyTraverseLayoutEffects(finishedRoot, finishedWork, committedLanes);
 
+          // TODO: 这里是为啥子哟？
           if (flags & Update) {
             commitHookLayoutEffects(finishedWork, Layout | HasEffect);
           }
@@ -24453,6 +24480,7 @@
           recursivelyTraverseLayoutEffects(finishedRoot, finishedWork, committedLanes);
 
           if (flags & Update) {
+            // commitLayoutEffectOnFiber（调用生命周期钩子和hook相关操作）
             commitClassLayoutLifecycles(finishedWork, current);
           }
 
@@ -25734,6 +25762,7 @@
     }
   }
 
+  // layout 阶段调用的函数
   function commitLayoutEffects(finishedWork, root, committedLanes) {
     inProgressLanes = committedLanes;
     inProgressRoot = root;
@@ -28378,7 +28407,16 @@
       // componentWillUnmount, but before the layout phase, so that the finished
       // work is current during componentDidMount/Update.
 
-      root.current = finishedWork; // The next phase is the layout phase, where we call effects that read
+
+      // TODO: 切换 fiber 树
+      root.current = finishedWork; 
+      // The next phase is the layout phase, where we call effects that read
+      // 下一阶段是布局阶段，我们称之为效果
+
+      // 我们知道componentWillUnmount会在mutation阶段执行。
+      // 此时current Fiber树还指向前一次更新的Fiber树，在生命周期钩子内获取的DOM还是更新前的。
+      // componentDidMount和componentDidUpdate会在layout阶段执行。
+      // 此时current Fiber树已经指向更新后的Fiber树，在生命周期钩子内获取的DOM就是更新后的。
 
       {
         markLayoutEffectsStarted(lanes);
