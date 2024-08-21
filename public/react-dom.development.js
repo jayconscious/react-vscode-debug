@@ -4848,6 +4848,7 @@
   var requestPaint = unstable_requestPaint;
   var now = unstable_now;
   var getCurrentPriorityLevel = unstable_getCurrentPriorityLevel;
+  // Tip: 优先级常量定义
   var ImmediatePriority = unstable_ImmediatePriority;
   var UserBlockingPriority = unstable_UserBlockingPriority;
   var NormalPriority = unstable_NormalPriority;
@@ -6090,6 +6091,8 @@
   function setCurrentUpdatePriority(newPriority) {
     currentUpdatePriority = newPriority;
   }
+
+  // Tip: 
   function runWithPriority(priority, fn) {
     var previousPriority = currentUpdatePriority;
 
@@ -13532,6 +13535,10 @@
     return root;
   }
 
+  // Tip:  Update the source fiber's lanes
+  // 我们知道，render 阶段是从 rootFiber 开始向下遍历。
+  // 那么如何从触发状态更新的 fiber 得到 rootFiber 呢
+  // 该方法做的工作可以概括为：从触发状态更新的fiber一直向上遍历到rootFiber，并返回rootFiber
   function markUpdateLaneFromFiberToRoot(sourceFiber, update, lane) {
     // Update the source fiber's lanes
     sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
@@ -13642,16 +13649,21 @@
     currentlyProcessingQueue = null;
   }
 
+  // UpdateQueue 为fiber 节点中，存储 Update，数据结构是 对象
   function initializeUpdateQueue(fiber) {
     var queue = {
       baseState: fiber.memoizedState,
+      // baseState：本次更新前该Fiber节点的state，Update基于该state计算更新后的state。
       firstBaseUpdate: null,
       lastBaseUpdate: null,
+      // shared.pending：触发更新时，产生的Update会保存在shared.pending中形成单向环状链表。
+      // 当由 Update 计算state时这个环会被剪开并连接在 lastBaseUpdate 后面
       shared: {
         pending: null,
         lanes: NoLanes,
         hiddenCallbacks: null
       },
+      // 保存 update.callback !== null的Update
       callbacks: null
     };
     fiber.updateQueue = queue;
@@ -13672,17 +13684,21 @@
       workInProgress.updateQueue = clone;
     }
   }
+  // Tip: 
   function createUpdate(eventTime, lane) {
     var update = {
       eventTime: eventTime,
       lane: lane,
-      tag: UpdateState,
+      tag: UpdateState, 
+      // tag：更新的类型，包括UpdateState | ReplaceState | ForceUpdate | CaptureUpdate。
       payload: null,
       callback: null,
-      next: null
+      next: null  // 与其他Update连接形成链表。
     };
     return update;
   }
+
+  // 将个 update 插入到 updateQueue 队列上
   function enqueueUpdate$1(fiber, update, lane) {
     var updateQueue = fiber.updateQueue;
 
@@ -13708,10 +13724,11 @@
 
       if (pending === null) {
         // This is the first update. Create a circular list.
+        // 这是第一次更新。创建一个循环列表。
         update.next = update;
       } else {
-        update.next = pending.next;
-        pending.next = update;
+        update.next = pending.next; // u4 ---> u3
+        pending.next = update;      // u4 ---> u3 ----> u4
       }
 
       sharedQueue.pending = update; // Update the childLanes even though we're most likely already rendering
@@ -13926,6 +13943,8 @@
     return prevState;
   }
 
+
+  // render阶段的Update操作由processUpdateQueue完成
   function processUpdateQueue(workInProgress, props, instance, renderLanes) {
     // This is always non-null on a ClassComponent or HostRoot
     var queue = workInProgress.updateQueue;
@@ -14273,6 +14292,7 @@
     }
   }
 
+  // class组件相关
   var classComponentUpdater = {
     isMounted: isMounted,
     enqueueSetState: function (inst, payload, callback) {
@@ -15585,6 +15605,8 @@
           }
         }
 
+        // Tip: 最后一个可复用的节点索引
+        // 最后一个可复用的节点在 oldFiber 中的位置索引
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
 
         if (previousNewFiber === null) {
@@ -27137,12 +27159,15 @@
       // decided not to enable it.
        (executionContext & RenderContext) !== NoContext
     );
-  } // Use this function to schedule a task for a root. There's only one task per
+  } 
+  
+  // Use this function to schedule a task for a root. There's only one task per
   // root; if a task was already scheduled, we'll check to make sure the priority
   // of the existing task is the same as the priority of the next level that the
   // root has work on. This function is called on every update, and right before
   // exiting a task.
 
+  // 接下来通知Scheduler根据更新的优先级，决定以同步还是异步的方式调度本次更新
   function ensureRootIsScheduled(root, currentTime) {
     var existingCallbackNode = root.callbackNode; // Check if any lanes are being starved by other work. If so, mark them as
     // expired so we know to work on those next.
@@ -30331,12 +30356,13 @@
   // them through the root constructor. Perhaps we should put them all into a
   // single type, like a DynamicHostConfig that is defined by the renderer.
   identifierPrefix, onRecoverableError, transitionCallbacks) {
-    // 
+    // Tip: 解释源码的时候，就是用 FiberRootNode 来代替 root (不要那么的死板，可以更加形象一点)
     var root = new FiberRootNode(containerInfo, tag, hydrate, identifierPrefix, onRecoverableError);
     // stateNode is any.
 
 
     // Tip: 没有初始化的fiber，第一次没有渲染，所以是空的fiber节点
+    // 连接 rootFiber 与 fiberRootNode
     var uninitializedFiber = createHostRootFiber(tag, isStrictMode);
     root.current = uninitializedFiber;
     uninitializedFiber.stateNode = root;
@@ -30527,9 +30553,12 @@
       }
     }
 
-    var update = createUpdate(eventTime, lane); // Caution: React DevTools currently depends on this property
+    // 创建 update
+    var update = createUpdate(eventTime, lane); 
+    // Caution: React DevTools currently depends on this property
     // being called "element".
 
+    // TODO: 这就是我们在 Update 一节介绍的，对于 HostRoot，payload为ReactDOM.render的第一个传参。
     update.payload = {
       element: element
     };
@@ -30545,8 +30574,10 @@
       update.callback = callback;
     }
 
+    // 将生成的 update 加入 updateQueue
     var root = enqueueUpdate$1(current$1, update, lane);
 
+    // 直接调度更新，并没有添加优先级参数
     if (root !== null) {
       scheduleUpdateOnFiber(root, current$1, lane, eventTime);
       entangleTransitions(root, current$1, lane);
@@ -31223,6 +31254,7 @@
     // legacy API.
   }
 
+  // container指ReactDOM.render的第二个参数（即应用挂载的DOM节点）
   function legacyCreateRootFromDOMContainer(container, initialChildren, parentComponent, callback, isHydrationContainer) {
     if (isHydrationContainer) {
       if (typeof callback === 'function') {
@@ -31369,6 +31401,8 @@
 
     return legacyRenderSubtreeIntoContainer(null, element, container, true, callback);
   }
+
+  // 
   function render(element, container, callback) {
     {
       error('ReactDOM.render is no longer supported in React 18. Use createRoot ' + 'instead. Until you switch to the new API, your app will behave as ' + "if it's running React 17. Learn " + 'more: https://reactjs.org/link/switch-to-createroot');

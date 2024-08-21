@@ -2623,6 +2623,7 @@
   }
 
   // TODO: Use symbols?
+  // schedule 优先级定义
   var ImmediatePriority = 1;
   var UserBlockingPriority = 2;
   var NormalPriority = 3;
