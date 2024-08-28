@@ -4058,7 +4058,9 @@
       isInsideEventHandler = false;
       finishEventHandler();
     }
-  } // TODO: Replace with flushSync
+  }
+
+  // TODO: Replace with flushSync
   function setBatchingImplementation(_batchedUpdatesImpl, _discreteUpdatesImpl, _flushSyncImpl) {
     batchedUpdatesImpl = _batchedUpdatesImpl;
     flushSyncImpl = _flushSyncImpl;
@@ -13439,6 +13441,7 @@
   var concurrentQueues = [];
   var concurrentQueuesIndex = 0;
   var concurrentlyUpdatedLanes = NoLanes;
+
   function finishQueueingConcurrentUpdates() {
     var endIndex = concurrentQueuesIndex;
     concurrentQueuesIndex = 0;
@@ -13478,6 +13481,7 @@
     return concurrentlyUpdatedLanes;
   }
 
+  // 
   function enqueueUpdate(fiber, queue, update, lane) {
     // Don't update the `childLanes` on the return path yet. If we already in
     // the middle of rendering, wait until after it has completed.
@@ -13684,7 +13688,7 @@
       workInProgress.updateQueue = clone;
     }
   }
-  // Tip: 
+  // Tip: 构建一个 update 对象
   function createUpdate(eventTime, lane) {
     var update = {
       eventTime: eventTime,
@@ -16505,7 +16509,8 @@
   var renderLanes = NoLanes; // The work-in-progress fiber. I've named it differently to distinguish it from
   // the work-in-progress hook.
 
-  var currentlyRenderingFiber$1 = null; // Hooks are stored as a linked list on the fiber's memoizedState field. The
+  var currentlyRenderingFiber$1 = null; 
+  // Hooks are stored as a linked list on the fiber's memoizedState field. The
   // current hook list is the list that belongs to the current fiber. The
   // work-in-progress hook list is a new list that will be added to the
   // work-in-progress fiber.
@@ -16516,7 +16521,10 @@
   // finished evaluating this component. This is an optimization so we know
   // whether we need to clear render phase updates after a throw.
 
-  var didScheduleRenderPhaseUpdate = false; // Where an update was scheduled only during the current render pass. This
+  // 是否是render阶段触发的更新
+  var didScheduleRenderPhaseUpdate = false; 
+
+  // Where an update was scheduled only during the current render pass. This
   // gets reset after each attempt.
   // TODO: Maybe there's some way to consolidate this with
   // `didScheduleRenderPhaseUpdate`. Or with `numberOfReRenders`.
@@ -16647,6 +16655,7 @@
     return true;
   }
 
+  // TODO: 当FunctionComponent进入render阶段的beginWork时，会调用 renderWithHooks 方法。
   function renderWithHooks(current, workInProgress, Component, props, secondArg, nextRenderLanes) {
     renderLanes = nextRenderLanes;
     currentlyRenderingFiber$1 = workInProgress;
@@ -16672,6 +16681,7 @@
     // Non-stateful hooks (e.g. context) don't get added to memoizedState,
     // so memoizedState would be null during updates and mounts.
 
+    // 区分 current 的阶段使用不同的 hook 方法
     {
       if (current !== null && current.memoizedState !== null) {
         ReactCurrentDispatcher$1.current = HooksDispatcherOnUpdateInDEV;
@@ -16687,7 +16697,9 @@
       }
     }
 
-    var children = Component(props, secondArg); // Check if there was a render phase update
+    // TODO: 
+    var children = Component(props, secondArg); 
+    // Check if there was a render phase update
 
     if (didScheduleRenderPhaseUpdateDuringThisPass) {
       // Keep rendering in a loop for as long as render phase updates continue to
@@ -16768,6 +16780,7 @@
 
     return children;
   }
+
   function checkDidRenderIdHook() {
     // This should be called immediately after every renderWithHooks call.
     // Conceptually, it's part of the return value of renderWithHooks; it's only a
@@ -16833,7 +16846,10 @@
     localIdCounter = 0;
   }
 
+  // TODO: 
   function mountWorkInProgressHook() {
+
+    // hook 定义 
     var hook = {
       memoizedState: null,
       baseState: null,
@@ -16842,17 +16858,20 @@
       next: null
     };
 
+    // 将hook插入fiber.memoizedState链表末尾
     if (workInProgressHook === null) {
       // This is the first hook in the list
       currentlyRenderingFiber$1.memoizedState = workInProgressHook = hook;
     } else {
       // Append to the end of the list
+      // Tip: 
       workInProgressHook = workInProgressHook.next = hook;
     }
 
     return workInProgressHook;
   }
 
+  // 在 update 阶段，获取当前 hook
   function updateWorkInProgressHook() {
     // This function is used both for updates and for re-renders triggered by a
     // render phase update. It assumes there is either a current hook we can
@@ -16920,6 +16939,7 @@
     };
   }
 
+  // Tip: 执行组件内部自定义的逻辑，(即我们编写的setState的逻辑)
   function basicStateReducer(state, action) {
     // $FlowFixMe: Flow doesn't like mixed types
     return typeof action === 'function' ? action(state) : action;
@@ -16948,6 +16968,9 @@
     return [hook.memoizedState, dispatch];
   }
 
+  // 如果说mount时这两者还有区别，那update时，useReducer与useState调用的则是同一个函数updateReducer。
+
+  // 找到对应的hook，根据update计算该hook的新state并返回
   function updateReducer(reducer, initialArg, init) {
     var hook = updateWorkInProgressHook();
     var queue = hook.queue;
@@ -17356,7 +17379,10 @@
     }
   }
 
+  // TODO: 待深入
+  // useState 的返回
   function mountState(initialState) {
+    // 先处理hook，获取当前的hook，在 mount 阶段
     var hook = mountWorkInProgressHook();
 
     if (typeof initialState === 'function') {
@@ -17365,6 +17391,8 @@
     }
 
     hook.memoizedState = hook.baseState = initialState;
+    // hook queue，每个 useState 对应一个 hook 对象。
+    // 产生的 update 保存在 useState 对应的 hook.queue中
     var queue = {
       pending: null,
       lanes: NoLanes,
@@ -17373,7 +17401,9 @@
       lastRenderedState: initialState
     };
     hook.queue = queue;
+    // 返回的是啥？ dispatch
     var dispatch = queue.dispatch = dispatchSetState.bind(null, currentlyRenderingFiber$1, queue);
+    // 计算返回新的 state ?
     return [hook.memoizedState, dispatch];
   }
 
@@ -17885,6 +17915,9 @@
     markUpdateInDevTools(fiber, lane);
   }
 
+  // useState 调用阶段
+  // 组件内部声明的 useState 执行，即 action 参数
+  // dispatchAction
   function dispatchSetState(fiber, queue, action) {
     {
       if (typeof arguments[3] === 'function') {
@@ -17893,6 +17926,7 @@
     }
 
     var lane = requestUpdateLane(fiber);
+    // hook update 对象
     var update = {
       lane: lane,
       action: action,
@@ -17901,11 +17935,14 @@
       next: null
     };
 
+    // 什么条件下 ？ render阶段触发的更新？
+    // 为什么会render阶段触发更新？=> bad code
     if (isRenderPhaseUpdate(fiber)) {
       enqueueRenderPhaseUpdate(queue, update);
     } else {
       var alternate = fiber.alternate;
 
+      // 
       if (fiber.lanes === NoLanes && (alternate === null || alternate.lanes === NoLanes)) {
         // The queue is currently empty, which means we can eagerly compute the
         // next state before entering the render phase. If the new state is the
@@ -17922,24 +17959,30 @@
 
           try {
             var currentState = queue.lastRenderedState;
-            var eagerState = lastRenderedReducer(currentState, action); // Stash the eagerly computed state, and the reducer used to compute
+            // 拿到执行完自定义的逻辑的state, eager(急切的)
+            var eagerState = lastRenderedReducer(currentState, action); 
+            // Stash the eagerly computed state, and the reducer used to compute
             // it, on the update object. If the reducer hasn't changed by the
             // time we enter the render phase, then the eager state can be used
             // without calling the reducer again.
 
+            // hasEagerState 用来干嘛的？
             update.hasEagerState = true;
             update.eagerState = eagerState;
 
             if (objectIs(eagerState, currentState)) {
               // Fast path. We can bail out without scheduling React to re-render.
+
               // It's still possible that we'll need to rebase this update later,
               // if the component re-renders for a different reason and by that
               // time the reducer has changed.
+
               // TODO: Do we still need to entangle transitions in this case?
               enqueueConcurrentHookUpdateAndEagerlyBailout(fiber, queue, update);
               return;
             }
-          } catch (error) {// Suppress the error. It will throw again in the render phase.
+          } catch (error) {
+            // Suppress the error. It will throw again in the render phase.
           } finally {
             {
               ReactCurrentDispatcher$1.current = prevDispatcher;
@@ -17948,10 +17991,12 @@
         }
       }
 
+      // TODO: 
       var root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
 
       if (root !== null) {
         var eventTime = requestEventTime();
+        // 调度任务更新
         scheduleUpdateOnFiber(root, fiber, lane, eventTime);
         entangleTransitionUpdate(root, queue, lane);
       }
@@ -17959,6 +18004,11 @@
 
     markUpdateInDevTools(fiber, lane);
   }
+
+  // currentlyRenderingFiber 即 workInProgress，
+  // workInProgress 存在代表当前处于 render阶段
+  // 触发更新时通过bind预先保存的fiber与workInProgress全等，
+  // 代表本次更新发生于FunctionComponent对应fiber的render阶段
 
   function isRenderPhaseUpdate(fiber) {
     var alternate = fiber.alternate;
@@ -17974,6 +18024,8 @@
 
     if (pending === null) {
       // This is the first update. Create a circular list.
+      // 初始化，构建一个环状链表
+      // TODO: 为什么？
       update.next = update;
     } else {
       update.next = pending.next;
@@ -18055,6 +18107,8 @@
     ContextOnlyDispatcher.getCacheForType = getCacheForType;
     ContextOnlyDispatcher.useCacheRefresh = throwInvalidHookError;
   }
+
+  // mount阶段 和 update阶段使用的hook是不一样的，有什么不同，为什么要这么做？
 
   var HooksDispatcherOnMountInDEV = null;
   var HooksDispatcherOnMountWithHookTypesInDEV = null;
@@ -20737,7 +20791,9 @@
     var lazyComponent = elementType;
     var payload = lazyComponent._payload;
     var init = lazyComponent._init;
-    var Component = init(payload); // Store the unwrapped component in the type.
+
+    var Component = init(payload); 
+    // Store the unwrapped component in the type.
 
     workInProgress.type = Component;
     var resolvedTag = workInProgress.tag = resolveLazyComponentTag(Component);
@@ -21532,7 +21588,8 @@
             // Intentionally mutating since this render will get interrupted. This
             // is one of the very rare times where we mutate the current tree
             // during the render phase.
-            suspenseState.retryLane = attemptHydrationAtLane; // TODO: Ideally this would inherit the event time of the current render
+            suspenseState.retryLane = attemptHydrationAtLane; 
+            // TODO: Ideally this would inherit the event time of the current render
 
             var eventTime = NoTimestamp;
             enqueueConcurrentRenderForLane(current, attemptHydrationAtLane);
@@ -27068,6 +27125,7 @@
     return claimNextRetryLane();
   }
 
+  // TODO: 调度更新？
   function scheduleUpdateOnFiber(root, fiber, lane, eventTime) {
     {
       if (isRunningInsertionEffect) {
@@ -27733,6 +27791,10 @@
       }
     }
   }
+
+  // React Hooks有batchedUpdates，当在click中触发三次updateNum，
+  // 精简React会触发三次更新，而React只会触发一次。
+  // 如何合并 update ？
   function batchedUpdates$1(fn, a) {
     var prevExecutionContext = executionContext;
     executionContext |= BatchedContext;
@@ -27750,6 +27812,7 @@
       }
     }
   }
+
   function discreteUpdates(fn, a, b, c, d) {
     var previousPriority = getCurrentUpdatePriority();
     var prevTransition = ReactCurrentBatchConfig$3.transition;
@@ -28002,7 +28065,8 @@
   function renderRootSync(root, lanes) {
     var prevExecutionContext = executionContext;
     executionContext |= RenderContext;
-    var prevDispatcher = pushDispatcher(); // If the root or lanes have changed, throw out the existing stack
+    var prevDispatcher = pushDispatcher(); 
+    // If the root or lanes have changed, throw out the existing stack
     // and prepare a fresh one. Otherwise we'll continue where we left off.
 
     if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
@@ -30642,7 +30706,9 @@
     if (suspenseState !== null && suspenseState.dehydrated !== null) {
       suspenseState.retryLane = higherPriorityLane(suspenseState.retryLane, retryLane);
     }
-  } // Increases the priority of thenables when they resolve within this boundary.
+  } 
+  // Increases the priority of thenables when they resolve within this boundary.
+  // 当 thenables 在此边界内解析时，增加thenables的优先级
 
 
   function markRetryLaneIfNotHydrated(fiber, retryLane) {
