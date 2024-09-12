@@ -27469,9 +27469,11 @@
 
     ensureRootIsScheduled(root, now());
 
+    // TODO: 返回自己？什么情况？
     if (root.callbackNode === originalCallbackNode) {
       // The task node scheduled for this root is the same one that's
       // currently executed. Need to return a continuation.
+      // 为该根调度的任务节点与当前执行的任务节点相同。需要返回一个延续。
       return performConcurrentWorkOnRoot.bind(null, root);
     }
 
@@ -28209,6 +28211,9 @@
   function workLoopConcurrent() {
     // Perform work until Scheduler asks us to yield
     while (workInProgress !== null && !shouldYield()) {
+      // 每次去判断浏览器是否还有剩余时间来执行，
+      // Q：每次判断是否还有剩余时间，是以怎样的一个维度来的？
+      // A：那么就要看 performUnitOfWork 是以什么作为一个工作单位？
       performUnitOfWork(workInProgress);
     }
   }
@@ -28445,6 +28450,8 @@
         // 以及为什么要异步（而不是同步）调度。
         // 在此处，被异步调度的回调函数就是触发useEffect的方法flushPassiveEffects。
         // 我们接下来讨论useEffect如何被异步调度，以及为什么要异步（而不是同步）调度。
+
+        // 这里设置的任务优先级就是 NormalPriority
         scheduleCallback$2(NormalPriority, function () {
           flushPassiveEffects(); 
           // This render triggered passive effects: release the root cache pool

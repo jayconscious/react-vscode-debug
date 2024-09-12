@@ -2537,6 +2537,8 @@
     return context;
   }
 
+  // 为了能在O(1)复杂度找到两个队列中时间最早的那个任务，
+  // Scheduler使用 小顶堆 实现了优先级队列。
   var enableSchedulerDebugging = false;
   var enableProfiling = false;
   var frameYieldMs = 5;
@@ -2659,6 +2661,7 @@
 
   var IMMEDIATE_PRIORITY_TIMEOUT = -1; // Eventually times out
 
+  // 这些延时设置是如何确定的？
   var USER_BLOCKING_PRIORITY_TIMEOUT = 250;
   var NORMAL_PRIORITY_TIMEOUT = 5000;
   var LOW_PRIORITY_TIMEOUT = 10000; // Never times out
@@ -2670,7 +2673,9 @@
 
   var taskIdCounter = 1; // Pausing the scheduler is useful for debugging.
   var currentTask = null;
-  var currentPriorityLevel = NormalPriority; // This is set while performing work, to prevent re-entrance.
+  var currentPriorityLevel = NormalPriority; 
+  // This is set while performing work, to prevent re-entrance.
+  // 记录当前任务的优先级
 
   var isPerformingWork = false;
   var isHostCallbackScheduled = false;
@@ -2678,7 +2683,8 @@
 
   var localSetTimeout = typeof setTimeout === 'function' ? setTimeout : null;
   var localClearTimeout = typeof clearTimeout === 'function' ? clearTimeout : null;
-  var localSetImmediate = typeof setImmediate !== 'undefined' ? setImmediate : null; // IE and Node.js + jsdom
+  var localSetImmediate =
+   typeof setImmediate !== 'undefined' ? setImmediate : null; // IE and Node.js + jsdom
 
   var isInputPending = typeof navigator !== 'undefined' && navigator.scheduling !== undefined && navigator.scheduling.isInputPending !== undefined ? navigator.scheduling.isInputPending.bind(navigator.scheduling) : null;
 
@@ -2722,6 +2728,7 @@
     }
   }
 
+  // TODO: 
   function flushWork(hasTimeRemaining, initialTime) {
 
 
@@ -2760,9 +2767,11 @@
     }
   }
 
+  // TODO: 
   function workLoop(hasTimeRemaining, initialTime) {
     var currentTime = initialTime;
     advanceTimers(currentTime);
+    // 
     currentTask = peek(taskQueue);
 
     while (currentTask !== null && !(enableSchedulerDebugging )) {
@@ -2772,7 +2781,7 @@
       }
 
       var callback = currentTask.callback;
-
+      
       if (typeof callback === 'function') {
         currentTask.callback = null;
         currentPriorityLevel = currentTask.priorityLevel;
@@ -2781,11 +2790,14 @@
         var continuationCallback = callback(didUserCallbackTimeout);
         currentTime = getCurrentTime();
 
+        // 当注册的回调函数执行后的返回值 continuationCallback 为function，
+      // 会将 continuationCallback 作为当前任务的回调函数。
         if (typeof continuationCallback === 'function') {
           currentTask.callback = continuationCallback;
         } else {
-
+          // 
           if (currentTask === peek(taskQueue)) {
+            // 将当前任务清除
             pop(taskQueue);
           }
         }
@@ -2812,6 +2824,8 @@
     }
   }
 
+  // TODO: 
+  // 在回调函数(eventHandler)内部调用获取优先级的方法都会取得第一个参数(priorityLevel)对应的优先级：
   function unstable_runWithPriority(priorityLevel, eventHandler) {
     switch (priorityLevel) {
       case ImmediatePriority:
@@ -2877,14 +2891,18 @@
     };
   }
 
+  // Scheduler 对外暴露最重要的方法便是 unstable_scheduleCallback。
+  // 该方法用于以某个优先级注册回调函数
   function unstable_scheduleCallback(priorityLevel, callback, options) {
     var currentTime = getCurrentTime();
     var startTime;
 
+    // 已就绪任务/未就绪任务
     if (typeof options === 'object' && options !== null) {
       var delay = options.delay;
 
       if (typeof delay === 'number' && delay > 0) {
+        // 任务被延迟
         startTime = currentTime + delay;
       } else {
         startTime = currentTime;
@@ -2895,6 +2913,7 @@
 
     var timeout;
 
+    // 
     switch (priorityLevel) {
       case ImmediatePriority:
         timeout = IMMEDIATE_PRIORITY_TIMEOUT;
@@ -2919,6 +2938,7 @@
     }
 
     var expirationTime = startTime + timeout;
+    // 过期时间
     var newTask = {
       id: taskIdCounter++,
       callback: callback,
@@ -2931,6 +2951,7 @@
     if (startTime > currentTime) {
       // This is a delayed task.
       newTask.sortIndex = startTime;
+      // timerQueue：保存未就绪任务
       push(timerQueue, newTask);
 
       if (peek(taskQueue) === null && newTask === peek(timerQueue)) {
@@ -2947,6 +2968,7 @@
       }
     } else {
       newTask.sortIndex = expirationTime;
+      // taskQueue：保存已就绪任务
       push(taskQueue, newTask);
       // wait until the next time we yield.
 
@@ -2989,7 +3011,9 @@
 
   var isMessageLoopRunning = false;
   var scheduledHostCallback = null;
-  var taskTimeoutID = -1; // Scheduler periodically yields in case there is other work on the main
+  var taskTimeoutID = -1; 
+
+  // Scheduler periodically yields in case there is other work on the main
   // thread, like user events. By default, it yields multiple times per frame.
   // It does not attempt to align with frame boundaries, since most tasks don't
   // need to be frame aligned; for those that do, use requestAnimationFrame.
@@ -2997,8 +3021,10 @@
   var frameInterval = frameYieldMs;
   var startTime = -1;
 
+  
   function shouldYieldToHost() {
     var timeElapsed = getCurrentTime() - startTime;
+    // 已过去时间
 
     if (timeElapsed < frameInterval) {
       // The main thread has only been blocked for a really short amount of time;
@@ -3014,6 +3040,7 @@
 
   }
 
+  // 随着应用运行，会通过fps动态调整分配给任务的可执行时间
   function forceFrameRate(fps) {
     if (fps < 0 || fps > 125) {
       // Using console['error'] to evade Babel and ESLint
@@ -3028,6 +3055,8 @@
       frameInterval = frameYieldMs;
     }
   }
+
+  // 时间片切片，使用那个作为js执行时机
 
   var performWorkUntilDeadline = function () {
     if (scheduledHostCallback !== null) {
@@ -3063,6 +3092,7 @@
 
   var schedulePerformWorkUntilDeadline;
 
+  // setImmediate 执行时机
   if (typeof localSetImmediate === 'function') {
     // Node.js and old IE.
     // There's a few reasons for why we prefer setImmediate.
@@ -3081,6 +3111,7 @@
   } else if (typeof MessageChannel !== 'undefined') {
     // DOM and Worker environments.
     // We prefer MessageChannel because of the 4ms setTimeout clamping.
+    // 我们更喜欢 MessageChannel 因为 4ms setTimeout 限制
     var channel = new MessageChannel();
     var port = channel.port2;
     channel.port1.onmessage = performWorkUntilDeadline;
