@@ -5260,6 +5260,8 @@
 
   // If those values are changed that package should be rebuilt and redeployed.
 
+  // lane模型借鉴了同样的概念，使用31位的二进制表示31条赛道，
+  // 位数越小的赛道优先级越高，某些相邻的赛道拥有相同优先级。
   var TotalLanes = 31;
   var NoLanes =
   /*                        */
@@ -5285,6 +5287,8 @@
   var TransitionHydrationLane =
   /*                */
   32;
+
+  // TransitionLanes是Suspense、useTransition、useDeferredValue拥有的优先级范围。
   var TransitionLanes =
   /*                       */
   4194240;
@@ -5759,7 +5763,7 @@
     return (lanes & TransitionLanes) === lanes;
   }
   function includesBlockingLane(root, lanes) {
-
+    // DefaultLanes是“请求数据返回后触发更新”拥有的优先级范围。
     var SyncDefaultLanes = InputContinuousHydrationLane | InputContinuousLane | DefaultHydrationLane | DefaultLane;
     return (lanes & SyncDefaultLanes) !== NoLanes;
   }
@@ -5812,10 +5816,12 @@
   function laneToIndex(lane) {
     return pickArbitraryLaneIndex(lane);
   }
-
+  // 计算a、b两个lane是否存在交集，只需要判断a与b按位与的结果是否为0：
   function includesSomeLane(a, b) {
     return (a & b) !== NoLanes;
   }
+  
+  // 计算b这个lanes是否是a对应的lanes的子集，只需要判断a与b按位与的结果是否为b：
   function isSubsetOfLanes(set, subset) {
     return (set & subset) === subset;
   }
@@ -29775,18 +29781,25 @@
     }
   }
 
+  // 节点的定义...
   function FiberNode(tag, pendingProps, key, mode) {
     // Instance
-    this.tag = tag;
-    this.key = key;
-    this.elementType = null;
+    this.tag = tag; // 标记  Fiber对应组件的类型 Function/Class/Host...
+    this.key = key; // key
+    this.elementType = null; // 大部分情况同 type，某些情况不同，比如 FunctionComponent 使用 React.memo 包裹
     this.type = null;
-    this.stateNode = null; // 真实的Dom节点
+    // 对于 FunctionComponent， 指函数本身，
+    // 对于 ClassComponent， 指class，
+    // 对于 HostComponent， 指DOM节点tagName
+
+    this.stateNode = null;  // 真实的Dom节点
+    
     
     // Fiber
-    this.return = null;
-    this.child = null;
-    this.sibling = null;
+    this.return = null; // 父节点
+    this.child = null;  // 子节点
+    this.sibling = null; // 指向右边第一个兄弟Fiber节点
+
     this.index = 0;
     this.ref = null;
     this.pendingProps = pendingProps;
@@ -29841,7 +29854,8 @@
         Object.preventExtensions(this);
       }
     }
-  } // This is a constructor function, rather than a POJO constructor, still
+  }
+  // This is a constructor function, rather than a POJO constructor, still
   // please ensure we do the following:
   // 1) Nobody should add any instance methods on this. Instance methods can be
   //    more difficult to predict when they get optimized and they are almost
