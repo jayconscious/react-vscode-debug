@@ -1595,6 +1595,7 @@
       isRendering = false;
     }
   }
+
   function setCurrentFiber(fiber) {
     {
       ReactDebugCurrentFrame.getCurrentStack = fiber === null ? null : getCurrentFiberStackInDev;
@@ -1602,6 +1603,7 @@
       isRendering = false;
     }
   }
+  
   function getCurrentFiber() {
     {
       return current;
@@ -4919,6 +4921,7 @@
       return false;
     }
   }
+  // 干嘛？
   function onScheduleRoot(root, children) {
     {
       if (injectedHook && typeof injectedHook.onScheduleFiberRoot === 'function') {
@@ -5033,7 +5036,8 @@
         }
       }
     }
-  } // Profiler API hooks
+  } 
+  // Profiler API hooks
 
   function injectProfilingHooks(profilingHooks) {
     injectedProfilingHooks = profilingHooks;
@@ -6038,6 +6042,7 @@
 
     return lane;
   }
+  // what? 
   function addFiberToLanesMap(root, fiber, lanes) {
 
     if (!isDevToolsPresent) {
@@ -6054,6 +6059,7 @@
       lanes &= ~lane;
     }
   }
+
   function movePendingFibersToMemoized(root, lanes) {
 
     if (!isDevToolsPresent) {
@@ -12169,10 +12175,14 @@
     // it might make more sense for the queue to be a list of roots instead of a
     // list of generic callbacks. Then we can have two: one for legacy roots, one
     // for concurrent roots. And this method would only flush the legacy ones.
+
     if (includesLegacySyncCallbacks) {
       flushSyncCallbacks();
     }
+
   }
+
+  // 更新队列
   function flushSyncCallbacks() {
     if (!isFlushingSyncQueue && syncQueue !== null) {
       // Prevent re-entrance.
@@ -12182,7 +12192,8 @@
 
       try {
         var isSync = true;
-        var queue = syncQueue; // TODO: Is this necessary anymore? The only user code that runs in this
+        var queue = syncQueue; 
+        // TODO: Is this necessary anymore? The only user code that runs in this
         // queue is in the render or commit phases.
 
         setCurrentUpdatePriority(DiscreteEventPriority);
@@ -13448,6 +13459,7 @@
   var concurrentQueuesIndex = 0;
   var concurrentlyUpdatedLanes = NoLanes;
 
+  // concurrentQueues 并发更新
   function finishQueueingConcurrentUpdates() {
     var endIndex = concurrentQueuesIndex;
     concurrentQueuesIndex = 0;
@@ -13483,11 +13495,12 @@
       }
     }
   }
+
   function getConcurrentlyUpdatedLanes() {
     return concurrentlyUpdatedLanes;
   }
 
-  // 
+  // ...
   function enqueueUpdate(fiber, queue, update, lane) {
     // Don't update the `childLanes` on the return path yet. If we already in
     // the middle of rendering, wait until after it has completed.
@@ -13495,9 +13508,13 @@
     concurrentQueues[concurrentQueuesIndex++] = queue;
     concurrentQueues[concurrentQueuesIndex++] = update;
     concurrentQueues[concurrentQueuesIndex++] = lane;
-    concurrentlyUpdatedLanes = mergeLanes(concurrentlyUpdatedLanes, lane); // The fiber's `lane` field is used in some places to check if any work is
+    // 按照0,1,2,3 顺序安排这些 fiber,queue,update,lane 
+    concurrentlyUpdatedLanes = mergeLanes(concurrentlyUpdatedLanes, lane); 
+
+    // The fiber's `lane` field is used in some places to check if any work is
     // scheduled, to perform an eager bailout, so we need to update it immediately.
     // TODO: We should probably move this to the "shared" queue instead.
+    // 我们可能应该将其移至“共享”队列
 
     fiber.lanes = mergeLanes(fiber.lanes, lane);
     var alternate = fiber.alternate;
@@ -13531,7 +13548,8 @@
   function enqueueConcurrentRenderForLane(fiber, lane) {
     enqueueUpdate(fiber, null, null, lane);
     return getRootForUpdatedFiber(fiber);
-  } // Calling this function outside this module should only be done for backwards
+  } 
+  // Calling this function outside this module should only be done for backwards
   // compatibility and should always be accompanied by a warning.
 
   function unsafe_markUpdateLaneFromFiberToRoot(sourceFiber, lane) {
@@ -13606,6 +13624,7 @@
     }
   }
 
+  // 获取啥？
   function getRootForUpdatedFiber(sourceFiber) {
     // TODO: We will detect and infinite update loop and throw even if this fiber
     // has already unmounted. This isn't really necessary but it happens to be the
@@ -13630,6 +13649,7 @@
       parent = node.return;
     }
 
+    // mount时 返回根 fiberRootNode
     return node.tag === HostRoot ? node.stateNode : null;
   }
 
@@ -13699,9 +13719,10 @@
     var update = {
       eventTime: eventTime,
       lane: lane,
-      tag: UpdateState, 
+      tag: UpdateState, // 默认设置一个更新对象
       // tag：更新的类型，包括UpdateState | ReplaceState | ForceUpdate | CaptureUpdate。
-      payload: null,
+      payload: null, // 
+
       callback: null,
       next: null  // 与其他Update连接形成链表。
     };
@@ -13727,9 +13748,11 @@
       }
     }
 
+    // TODO: 判断条件是啥？
     if (isUnsafeClassRenderPhaseUpdate()) {
       // This is an unsafe render phase update. Add directly to the update
       // queue so we can process it immediately during the current render.
+      // 这是不安全的渲染阶段更新。直接添加到更新队列中，以便我们可以在当前渲染期间立即处理它。
       var pending = sharedQueue.pending;
 
       if (pending === null) {
@@ -13741,7 +13764,9 @@
         pending.next = update;      // u4 ---> u3 ----> u4
       }
 
-      sharedQueue.pending = update; // Update the childLanes even though we're most likely already rendering
+      sharedQueue.pending = update; 
+
+      // Update the childLanes even though we're most likely already rendering
       // this fiber. This is for backwards compatibility in the case where you
       // update a different component during render phase than the one that is
       // currently renderings (a pattern that is accompanied by a warning).
@@ -23026,7 +23051,8 @@
   }
 
   function completeWork(current, workInProgress, renderLanes) {
-    var newProps = workInProgress.pendingProps; // Note: This intentionally doesn't check if we're hydrating because comparing
+    var newProps = workInProgress.pendingProps; 
+    // Note: This intentionally doesn't check if we're hydrating because comparing
     // to the current tree provider fiber is just as fast and less error-prone.
     // Ideally we would have a special version of the work loop only
     // for hydration.
@@ -27143,9 +27169,9 @@
       if (isFlushingPassiveEffects) {
         didScheduleUpdateDuringPassiveEffects = true;
       }
-    } // Mark that the root has a pending update.
-
-
+    } 
+    // Mark that the root has a pending update.
+    // 标记根有待更新
     markRootUpdated(root, lane, eventTime);
 
     if ((executionContext & RenderContext) !== NoLanes && root === workInProgressRoot) {
@@ -27154,10 +27180,14 @@
       // hook updates, which are handled differently and don't reach this
       // function), but there are some internal React features that use this as
       // an implementation detail, like selective hydration.
-      warnAboutRenderPhaseUpdatesInDEV(fiber); // Track lanes that were updated during the render phase
+
+      warnAboutRenderPhaseUpdatesInDEV(fiber); 
+      // Track lanes that were updated during the render phase
     } else {
       // This is a normal update, scheduled from outside the render phase. For
       // example, during an input event.
+      // 这是正常更新，从渲染阶段之外安排。例如，在输入事件期间
+
       {
         if (isDevToolsPresent) {
           addFiberToLanesMap(root, fiber, lane);
@@ -27166,6 +27196,7 @@
 
       warnIfUpdatesNotWrappedWithActDEV(fiber);
 
+      // 初始化的时候是空的
       if (root === workInProgressRoot) {
         // Received an update to a tree that's in the middle of rendering. Mark
         // that there was an interleaved update work on this root. Unless the
@@ -27189,18 +27220,23 @@
 
       ensureRootIsScheduled(root, eventTime);
 
-      if (lane === SyncLane && executionContext === NoContext && (fiber.mode & ConcurrentMode) === NoMode && // Treat `act` as if it's inside `batchedUpdates`, even in legacy mode.
+      if (lane === SyncLane && executionContext === NoContext && (fiber.mode & ConcurrentMode) === NoMode && 
+      // Treat `act` as if it's inside `batchedUpdates`, even in legacy mode.
       !( ReactCurrentActQueue$1.isBatchingLegacy)) {
         // Flush the synchronous work now, unless we're already working or inside
         // a batch. This is intentionally inside scheduleUpdateOnFiber instead of
         // scheduleCallbackForFiber to preserve the ability to schedule a callback
         // without immediately flushing it. We only do this for user-initiated
         // updates, to preserve historical behavior of legacy mode.
+
+        // 现在刷新同步工作，除非我们已经在工作或在批处理中。这是有意在 scheduleUpdateOnFiber 而不是 scheduleCallbackForFiber 中保留安排回调的能力
+        // 而不立即冲洗它。我们仅针对用户发起的情况执行此操作更新，以保留遗留模式的历史行为
         resetRenderTimer();
         flushSyncCallbacksOnlyInLegacyMode();
       }
     }
   }
+
   function scheduleInitialHydrationOnRoot(root, lane, eventTime) {
     // This is a special fork of scheduleUpdateOnFiber that is only used to
     // schedule the initial hydration of a root that has just been created. Most
@@ -27233,10 +27269,12 @@
 
   // 接下来通知Scheduler根据更新的优先级，决定以同步还是异步的方式调度本次更新
   function ensureRootIsScheduled(root, currentTime) {
-    var existingCallbackNode = root.callbackNode; // Check if any lanes are being starved by other work. If so, mark them as
+    var existingCallbackNode = root.callbackNode; 
+    // Check if any lanes are being starved by other work. If so, mark them as
     // expired so we know to work on those next.
 
-    markStarvedLanesAsExpired(root, currentTime); // Determine the next lanes to work on, and their priority.
+    markStarvedLanesAsExpired(root, currentTime); 
+    // Determine the next lanes to work on, and their priority.
 
     var nextLanes = getNextLanes(root, root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes);
 
@@ -27342,13 +27380,14 @@
           break;
       }
 
+      // 注册更新任务
       newCallbackNode = scheduleCallback$2(schedulerPriorityLevel, performConcurrentWorkOnRoot.bind(null, root));
     }
 
     root.callbackPriority = newCallbackPriority;
     root.callbackNode = newCallbackNode;
-  } // This is the entry point for every concurrent task, i.e. anything that
-  // goes through Scheduler.
+  }
+  // This is the entry point for every concurrent task, i.e. anything that goes through Scheduler.
 
 
   // Tip: render阶段，Concurrent 并发的，就是异步
@@ -28225,6 +28264,7 @@
   }
 
   function performUnitOfWork(unitOfWork) {
+    debugger
     // The current, flushed, state of this fiber is the alternate. Ideally
     // nothing should rely on this, but relying on it here means that we don't
     // need an additional field on the work in progress.
@@ -29802,6 +29842,8 @@
 
     this.index = 0;
     this.ref = null;
+
+    // 作为动态的工作单元的属性
     this.pendingProps = pendingProps;
     this.memoizedProps = null;
     this.updateQueue = null;
@@ -29813,6 +29855,8 @@
     this.flags = NoFlags;
     this.subtreeFlags = NoFlags;
     this.deletions = null;
+    
+    // 调度优先级相关
     this.lanes = NoLanes;
     this.childLanes = NoLanes;
     this.alternate = null;
@@ -29845,6 +29889,7 @@
 
     {
       // This isn't directly used but is handy for debugging internals:
+      // 这不直接使用，但对于调试内部结构很方便
       this._debugSource = null;
       this._debugOwner = null;
       this._debugNeedsRemount = false;
@@ -30442,9 +30487,9 @@
   // single type, like a DynamicHostConfig that is defined by the renderer.
   identifierPrefix, onRecoverableError, transitionCallbacks) {
     // Tip: 解释源码的时候，就是用 FiberRootNode 来代替 root (不要那么的死板，可以更加形象一点)
+    // debugger
     var root = new FiberRootNode(containerInfo, tag, hydrate, identifierPrefix, onRecoverableError);
     // stateNode is any.
-
 
     // Tip: 没有初始化的fiber，第一次没有渲染，所以是空的fiber节点
     // 连接 rootFiber 与 fiberRootNode
@@ -30609,16 +30654,20 @@
   }
   
   // Tip: 更新方法
+  // current$1 是哪个 fiber node
   function updateContainer(element, container, parentComponent, callback) {
     {
       onScheduleRoot(container, element);
     }
 
     var current$1 = container.current;
+    // 记录当前时间
     var eventTime = requestEventTime();
+    // 获取 react lane 优先级
     var lane = requestUpdateLane(current$1);
 
     {
+      // what?
       markRenderScheduled(lane);
     }
 
@@ -30638,7 +30687,7 @@
       }
     }
 
-    // 创建 update
+    // 构建一个 update 更新对象
     var update = createUpdate(eventTime, lane); 
     // Caution: React DevTools currently depends on this property
     // being called "element".
@@ -31156,7 +31205,7 @@
 
   // Tip: 
   function createRoot(container, options) {
-    // debugger
+    debugger
     if (!isValidContainer(container)) {
       throw new Error('createRoot(...): Target container is not a DOM element.');
     }
