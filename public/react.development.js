@@ -3126,6 +3126,7 @@
     };
   }
 
+  // 
   function requestHostCallback(callback) {
     scheduledHostCallback = callback;
 

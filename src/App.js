@@ -23,5 +23,9 @@ import "./App.css";
 
 export default function App() {
   const [num, add] = useState(0);
-  return <p onClick={() => add(num + 1)}>{num}</p>;
+  // return <p onClick={() => add(num + 1)}>{num}</p>;
+  return <div>
+    i am
+    <span> zzy</span>
+  </div>
 }

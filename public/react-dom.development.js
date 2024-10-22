@@ -67,9 +67,13 @@
 
   var FunctionComponent = 0;
   var ClassComponent = 1;
-  var IndeterminateComponent = 2; // Before we know whether it is function or class
+  var IndeterminateComponent = 2; 
+  // Before we know whether it is function or class
+  // 在我们知道它是函数还是类之前
 
-  var HostRoot = 3; // Root of a host tree. Could be nested inside another node.
+  var HostRoot = 3; 
+  // Root of a host tree. Could be nested inside another node.
+  // 宿主树的根。可以嵌套在另一个节点内
 
   var HostPortal = 4; // A subtree. Could be an entry point to a different renderer.
 
@@ -1588,6 +1592,7 @@
     }
   }
 
+  // 重置保存当前 fiber 相关变量
   function resetCurrentFiber() {
     {
       ReactDebugCurrentFrame.getCurrentStack = null;
@@ -12199,6 +12204,7 @@
         setCurrentUpdatePriority(DiscreteEventPriority);
 
         for (; i < queue.length; i++) {
+          // TODO: 这个 callback 是啥？
           var callback = queue[i];
 
           do {
@@ -13979,7 +13985,7 @@
   }
 
 
-  // render阶段的Update操作由processUpdateQueue完成
+  // render阶段的 Update 操作由 processUpdateQueue 完成
   function processUpdateQueue(workInProgress, props, instance, renderLanes) {
     // This is always non-null on a ClassComponent or HostRoot
     var queue = workInProgress.updateQueue;
@@ -15965,6 +15971,7 @@
     }
 
     // TODO: 做了哪些事情？
+    // mount 阶段 currentFirstChild == null
     function reconcileSingleElement(returnFiber, currentFirstChild, element, lanes) {
       var key = element.key; // element 即 newChild
       var child = currentFirstChild;
@@ -16099,6 +16106,7 @@
       if (typeof newChild === 'object' && newChild !== null) {
         switch (newChild.$$typeof) {
           case REACT_ELEMENT_TYPE:
+            // reconcileSingleElement 返回一个由react元素 创建的fiber
             return placeSingleChild(reconcileSingleElement(returnFiber, currentFirstChild, newChild, lanes));
 
           case REACT_PORTAL_TYPE:
@@ -16560,7 +16568,8 @@
   // TODO: Maybe there's some way to consolidate this with
   // `didScheduleRenderPhaseUpdate`. Or with `numberOfReRenders`.
 
-  var didScheduleRenderPhaseUpdateDuringThisPass = false; // Counts the number of useId hooks in this component.
+  var didScheduleRenderPhaseUpdateDuringThisPass = false; 
+  // Counts the number of useId hooks in this component.
 
   var localIdCounter = 0; // Used for ids that are generated completely client-side (i.e. not during
   // hydration). This counter is global, so client ids are not stable across
@@ -16686,7 +16695,7 @@
     return true;
   }
 
-  // TODO: 当FunctionComponent进入render阶段的beginWork时，会调用 renderWithHooks 方法。
+  // TODO: 当 FunctionComponent 进入 render 阶段的 beginWork 时，会调用 renderWithHooks 方法。
   function renderWithHooks(current, workInProgress, Component, props, secondArg, nextRenderLanes) {
     renderLanes = nextRenderLanes;
     currentlyRenderingFiber$1 = workInProgress;
@@ -16700,7 +16709,8 @@
 
     workInProgress.memoizedState = null;
     workInProgress.updateQueue = null;
-    workInProgress.lanes = NoLanes; // The following should have already been reset
+    workInProgress.lanes = NoLanes; 
+    // The following should have already been reset
     // currentHook = null;
     // workInProgressHook = null;
     // didScheduleRenderPhaseUpdate = false;
@@ -20980,8 +20990,9 @@
       }
     }
 
-    if ( // Run these checks in production only if the flag is off.
-    // Eventually we'll delete this branch altogether.
+    if ( 
+      // Run these checks in production only if the flag is off.
+      // Eventually we'll delete this branch altogether.
      typeof value === 'object' && value !== null && typeof value.render === 'function' && value.$$typeof === undefined) {
       {
         var _componentName2 = getComponentNameFromType(Component) || 'Unknown';
@@ -22476,6 +22487,7 @@
   // current：当前组件对应的Fiber节点在上一次更新时的Fiber节点，即workInProgress.alternate
   // workInProgress：当前组件对应的Fiber节点
   // renderLanes：优先级相关，在 Scheduler 时
+
   function beginWork(current, workInProgress, renderLanes) {
     {
       if (workInProgress._debugNeedsRemount && current !== null) {
@@ -22502,8 +22514,9 @@
         // update or context change.
         var hasScheduledUpdateOrContext = checkScheduledUpdateOrContext(current, renderLanes);
 
-        if (!hasScheduledUpdateOrContext && // If this is the second pass of an error or suspense boundary, there
-        // may not be work scheduled on `current`, so we check for this flag.
+        if (!hasScheduledUpdateOrContext && 
+          // If this is the second pass of an error or suspense boundary, there
+          // may not be work scheduled on `current`, so we check for this flag.
         (workInProgress.flags & DidCapture) === NoFlags) {
           // No pending updates or context. Bail out now.
           didReceiveUpdate = false;
@@ -22524,7 +22537,7 @@
         }
       }
     } else {
-      // mount 阶段
+      // mount  阶段
       didReceiveUpdate = false;
 
       if (getIsHydrating() && isForkedChild(workInProgress)) {
@@ -22580,6 +22593,7 @@
           return updateClassComponent(current, workInProgress, _Component, _resolvedProps, renderLanes);
         }
 
+      // 3
       case HostRoot:
         return updateHostRoot(current, workInProgress, renderLanes);
 
@@ -27032,7 +27046,7 @@
   var firstUncaughtError = null;
   var legacyErrorBoundariesThatAlreadyFailed = null; // Only used when enableProfilerNestedUpdateScheduledHook is true;
   var rootDoesHavePassiveEffects = false;
-  var rootWithPendingPassiveEffects = null;
+  var rootWithPendingPassiveEffects = null; // 
   var pendingPassiveEffectsLanes = NoLanes;
   var pendingPassiveProfilerEffects = [];
   var pendingPassiveEffectsRemainingLanes = NoLanes;
@@ -27394,7 +27408,8 @@
   function performConcurrentWorkOnRoot(root, didTimeout) {
     {
       resetNestedUpdateFlag();
-    } // Since we know we're in a React event, we can clear the current
+    }
+    // Since we know we're in a React event, we can clear the current
     // event time. The next update will compute a new event time.
 
 
@@ -28268,14 +28283,27 @@
     // The current, flushed, state of this fiber is the alternate. Ideally
     // nothing should rely on this, but relying on it here means that we don't
     // need an additional field on the work in progress.
-    var current = unitOfWork.alternate;
+
+    // 该纤程的当前刷新状态是备用状态。
+    // 理想情况下没有什么应该依赖于此，但在这里依赖它意味着我们不正在进行的工作需要一个额外的字段
+
+    var current = unitOfWork.alternate; 
+    // Tip: unitOfWork.alternate 指向的就是这个fiber节点上一次的fiber节点，可以理解为oldVNode
+    // TODO  Q: 在生成fiber节点阶段，是怎么挂在上去的？
     setCurrentFiber(unitOfWork);
     var next;
 
+    // & 按位与 计算
+    // 按位与（&）运算符在两个操作数对应的二进位都为 1 时，该位的结果值才为 1。
+
     if ( (unitOfWork.mode & ProfileMode) !== NoMode) {
+      // what?
       startProfilerTimer(unitOfWork);
+
       next = beginWork$1(current, unitOfWork, renderLanes$1);
+      
       stopProfilerTimerIfRunningAndRecordDelta(unitOfWork, true);
+      // what?
     } else {
       next = beginWork$1(current, unitOfWork, renderLanes$1);
     }
@@ -28391,6 +28419,7 @@
     }
   }
 
+  // 作用
   function commitRoot(root, recoverableErrors, transitions) {
     // TODO: This no longer makes any sense. 
     // We already wrap the mutation and layout phases. Should be able to remove.
@@ -28416,10 +28445,14 @@
       // means `flushPassiveEffects` will sometimes result in additional
       // passive effects. So we need to keep flushing in a loop until there are
       // no more pending effects.
+
       // TODO: Might be better if `flushPassiveEffects` did not automatically
       // flush synchronous work at the end, to avoid factoring hazards like this.
+
       flushPassiveEffects();
+
     } while (rootWithPendingPassiveEffects !== null);
+    // rootWithPendingPassiveEffects 是啥？
 
     flushRenderPhaseStrictModeWarningsInDEV();
 
@@ -28730,7 +28763,7 @@
     }
   }
 
-  // 
+  // 做了那些事情？
   function flushPassiveEffects() {
     // Returns whether passive effects were flushed.
     // TODO: Combine this check with the one in flushPassiveEFfectsImpl. We should
@@ -29824,9 +29857,10 @@
   // 节点的定义...
   function FiberNode(tag, pendingProps, key, mode) {
     // Instance
-    this.tag = tag; // 标记  Fiber对应组件的类型 Function/Class/Host...
+    this.tag = tag; // 标记  Fiber对应组件的类型 Function/Class/Host... number 类型
     this.key = key; // key
-    this.elementType = null; // 大部分情况同 type，某些情况不同，比如 FunctionComponent 使用 React.memo 包裹
+    this.elementType = null; 
+    // 大部分情况同 type，某些情况不同，比如 FunctionComponent 使用 React.memo 包裹
     this.type = null;
     // 对于 FunctionComponent， 指函数本身，
     // 对于 ClassComponent， 指class，
@@ -29928,6 +29962,7 @@
   function isSimpleFunctionComponent(type) {
     return typeof type === 'function' && !shouldConstruct$1(type) && type.defaultProps === undefined;
   }
+
   function resolveLazyComponentTag(Component) {
     if (typeof Component === 'function') {
       return shouldConstruct$1(Component) ? ClassComponent : FunctionComponent;
@@ -29944,7 +29979,8 @@
     }
 
     return IndeterminateComponent;
-  } // This is used to create an alternate fiber to do work on.
+  }
+  // This is used to create an alternate fiber to do work on.
 
   function createWorkInProgress(current, pendingProps) {
     var workInProgress = current.alternate;
