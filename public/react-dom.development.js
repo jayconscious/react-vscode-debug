@@ -16119,7 +16119,7 @@
             return reconcileChildFibers(returnFiber, currentFirstChild, init(payload), lanes);
         }
 
-        // 多个节点的情况
+        // 多个节点的情况，newChild是 array 的case
         if (isArray(newChild)) {
           return reconcileChildrenArray(returnFiber, currentFirstChild, newChild, lanes);
         }
@@ -16234,6 +16234,7 @@
     return context;
   }
 
+  // 
   function pushHostContext(fiber) {
     var rootInstance = requiredContext(rootInstanceStackCursor.current);
     var context = requiredContext(contextStackCursor$1.current);
@@ -22564,7 +22565,7 @@
     workInProgress.lanes = NoLanes;
 
     switch (workInProgress.tag) {
-      case IndeterminateComponent:
+      case IndeterminateComponent: // 2
         {
           return mountIndeterminateComponent(current, workInProgress, workInProgress.type, renderLanes);
         }
@@ -22575,7 +22576,7 @@
           return mountLazyComponent(current, workInProgress, elementType, renderLanes);
         }
 
-      case FunctionComponent:
+      case FunctionComponent: // 0
         {
           var Component = workInProgress.type;
           var unresolvedProps = workInProgress.pendingProps;
@@ -22583,7 +22584,7 @@
           return updateFunctionComponent(current, workInProgress, Component, resolvedProps, renderLanes);
         }
 
-      case ClassComponent:
+      case ClassComponent: // 1
         {
           var _Component = workInProgress.type;
           var _unresolvedProps = workInProgress.pendingProps;
@@ -22593,11 +22594,10 @@
           return updateClassComponent(current, workInProgress, _Component, _resolvedProps, renderLanes);
         }
 
-      // 3
-      case HostRoot:
+      case HostRoot: // 3
         return updateHostRoot(current, workInProgress, renderLanes);
 
-      case HostComponent:
+      case HostComponent: // 5
         return updateHostComponent(current, workInProgress, renderLanes);
 
       case HostText:
