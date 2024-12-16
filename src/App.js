@@ -21,11 +21,23 @@ import "./App.css";
 //   );
 // }
 
+// export default function App() {
+//   const [num, add] = useState(0);
+//   // return <p onClick={() => add(num + 1)}>{num}</p>;
+//   return <div>
+//     {/* <p><span onClick={() => {console.log('被点了呀')}}>111</span></p> */}
+//     <p><span>111</span></p>
+//     <div>
+//       <span>222</span>
+//     </div>
+//   </div>
+// }
+
+
 export default function App() {
-  const [num, add] = useState(0);
-  // return <p onClick={() => add(num + 1)}>{num}</p>;
-  return <div>
-    i am
-    <span> zzy</span>
-  </div>
+  return (
+    <div>
+      <p>111</p>
+    </div>
+  )
 }

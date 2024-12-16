@@ -11,7 +11,8 @@
     {
       suppressWarning = newSuppressWarning;
     }
-  } // In DEV, calls to console.warn and console.error get replaced
+  }
+  // In DEV, calls to console.warn and console.error get replaced
   // by calls to these methods by a Babel plugin.
   //
   // In PROD (or in packages without access to React internals),
@@ -78,7 +79,7 @@
   var HostPortal = 4; // A subtree. Could be an entry point to a different renderer.
 
   var HostComponent = 5;
-  var HostText = 6;
+  var HostText = 6;  // 文本节点类型，fiber
   var Fragment = 7;
   var Mode = 8;
   var ContextConsumer = 9;
@@ -9196,7 +9197,7 @@
             listener = _dispatchListeners$i.listener;
 
         if (instance !== previousInstance && event.isPropagationStopped()) {
-          return;
+          return;createRoot
         }
 
         executeDispatch(event, listener, currentTarget);
@@ -9270,7 +9271,9 @@
     }
 
     addTrappedEventListener(target, domEventName, eventSystemFlags, isCapturePhaseListener);
-  } // This is only used by createEventHandle when the
+  }
+
+  // This is only used by createEventHandle when the
   var listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
   function listenToAllSupportedEvents(rootContainerElement) {
     if (!rootContainerElement[listeningMarker]) {
@@ -11167,7 +11170,9 @@
     setTimeout(function () {
       throw error;
     });
-  } // -------------------
+  } 
+  // -------------------
+
   function commitMount(domElement, type, newProps, internalInstanceHandle) {
     // Despite the naming that might imply otherwise, this method only
     // fires if there is an `Update` effect scheduled during mounting.
@@ -11214,6 +11219,8 @@
   function appendChild(parentInstance, child) {
     parentInstance.appendChild(child);
   }
+
+  // 
   function appendChildToContainer(container, child) {
     var parentNode;
 
@@ -11223,7 +11230,8 @@
     } else {
       parentNode = container;
       parentNode.appendChild(child);
-    } // This container might be used for a portal.
+    } 
+    // This container might be used for a portal.
     // If something inside a portal is clicked, that click should bubble
     // through the React tree. However, on Mobile Safari the click would
     // never bubble through the *DOM* tree unless an ancestor with onclick
@@ -11327,9 +11335,12 @@
     var display = styleProp !== undefined && styleProp !== null && styleProp.hasOwnProperty('display') ? styleProp.display : null;
     instance.style.display = dangerousStyleValue('display', display);
   }
+
   function unhideTextInstance(textInstance, text) {
     textInstance.nodeValue = text;
   }
+
+  // 清除根节点挂在的内容
   function clearContainer(container) {
     if (container.nodeType === ELEMENT_NODE) {
       container.textContent = '';
@@ -11338,7 +11349,9 @@
         container.removeChild(container.documentElement);
       }
     }
-  } // -------------------
+  }
+
+  // -------------------
   function canHydrateInstance(instance, type, props) {
     if (instance.nodeType !== ELEMENT_NODE || type.toLowerCase() !== instance.nodeName.toLowerCase()) {
       return null;
@@ -13461,12 +13474,15 @@
   // we wait until the current render is over (either finished or interrupted)
   // before adding it to the fiber/hook queue. Push to this array so we can
   // access the queue, fiber, update, et al later.
+
   var concurrentQueues = [];
   var concurrentQueuesIndex = 0;
   var concurrentlyUpdatedLanes = NoLanes;
 
   // concurrentQueues 并发更新
+  // 将 update 挂在到 queue 上，
   function finishQueueingConcurrentUpdates() {
+    // debugger
     var endIndex = concurrentQueuesIndex;
     concurrentQueuesIndex = 0;
     concurrentlyUpdatedLanes = NoLanes;
@@ -13497,6 +13513,7 @@
       }
 
       if (lane !== NoLane) {
+        // 冒泡标记更新
         markUpdateLaneFromFiberToRoot(fiber, update, lane);
       }
     }
@@ -13520,6 +13537,7 @@
     // The fiber's `lane` field is used in some places to check if any work is
     // scheduled, to perform an eager bailout, so we need to update it immediately.
     // TODO: We should probably move this to the "shared" queue instead.
+
     // 我们可能应该将其移至“共享”队列
 
     fiber.lanes = mergeLanes(fiber.lanes, lane);
@@ -13573,6 +13591,7 @@
   // 我们知道，render 阶段是从 rootFiber 开始向下遍历。
   // 那么如何从触发状态更新的 fiber 得到 rootFiber 呢
   // 该方法做的工作可以概括为：从触发状态更新的fiber一直向上遍历到rootFiber，并返回rootFiber
+
   function markUpdateLaneFromFiberToRoot(sourceFiber, update, lane) {
     // Update the source fiber's lanes
     sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
@@ -13580,8 +13599,9 @@
 
     if (alternate !== null) {
       alternate.lanes = mergeLanes(alternate.lanes, lane);
-    } // Walk the parent path to the root and update the child lanes.
+    }
 
+    // Walk the parent path to the root and update the child lanes.
 
     var isHidden = false;
     var parent = sourceFiber.return;
@@ -13637,7 +13657,8 @@
     // current behavior we've used for several release cycles. Consider not
     // performing this check if the updated fiber already unmounted, since it's
     // not possible for that to cause an infinite update loop.
-    throwIfInfiniteUpdateLoopDetected(); // When a setState happens, we must ensure the root is scheduled. Because
+    throwIfInfiniteUpdateLoopDetected(); 
+    // When a setState happens, we must ensure the root is scheduled. Because
     // update queues do not have a backpointer to the root, the only way to do
     // this currently is to walk up the return path. This used to not be a big
     // deal because we would have to walk up the return path to set
@@ -13672,7 +13693,8 @@
   var UpdateState = 0;
   var ReplaceState = 1;
   var ForceUpdate = 2;
-  var CaptureUpdate = 3; // Global state that is reset at the beginning of calling `processUpdateQueue`.
+  var CaptureUpdate = 3; 
+  // Global state that is reset at the beginning of calling `processUpdateQueue`.
   // It should only be read right after calling `processUpdateQueue`, via
   // `checkHasForceUpdateAfterProcessing`.
 
@@ -13737,6 +13759,7 @@
 
   // 将个 update 插入到 updateQueue 队列上
   function enqueueUpdate$1(fiber, update, lane) {
+    debugger
     var updateQueue = fiber.updateQueue;
 
     if (updateQueue === null) {
@@ -13754,7 +13777,7 @@
       }
     }
 
-    // TODO: 判断条件是啥？
+    // TODO: 判断条件是啥？false
     if (isUnsafeClassRenderPhaseUpdate()) {
       // This is an unsafe render phase update. Add directly to the update
       // queue so we can process it immediately during the current render.
@@ -13782,6 +13805,7 @@
       return enqueueConcurrentClassUpdate(fiber, sharedQueue, update, lane);
     }
   }
+
   function entangleTransitions(root, fiber, lane) {
     var updateQueue = fiber.updateQueue;
 
@@ -22706,7 +22730,6 @@
 
   function markUpdate(workInProgress) {
     // Tag the fiber with an update effect. 
-
     // This turns a Placement into a PlacementAndUpdate.
     // 这会将 Placement 变成 PlacementAndUpdate
     workInProgress.flags |= Update;
@@ -22724,7 +22747,7 @@
   {
     // Mutation mode
     // Tip: do what ?
-    // 由于completeWork属于“归”阶段调用的函数，每次调用appendAllChildren时都会将已生成的子孙DOM节点插入当前生成的DOM节点下。
+    // 由于 completeWork 属于“归”阶段调用的函数，每次调用appendAllChildren时都会将已生成的子孙DOM节点插入当前生成的DOM节点下。
     // 那么当“归”到rootFiber时，我们已经有一个构建好的离屏DOM树。
     appendAllChildren = function (parent, workInProgress, needsVisibilityToggle, isHidden) {
       // We only have the top Fiber that was created but we need recurse down its
@@ -22798,6 +22821,7 @@
 
     updateHostText$1 = function (current, workInProgress, oldText, newText) {
       // If the text differs, mark it as an update. All the work in done in commitWork.
+      // 如果不同就标记，所有工作都在 commitWork 中完成
       if (oldText !== newText) {
         markUpdate(workInProgress);
       }
@@ -22884,12 +22908,17 @@
     }
   }
 
+  // completeWork 的核心代码逻辑
   function bubbleProperties(completedWork) {
+    // bail out 保释，走出困难
     var didBailout = completedWork.alternate !== null && completedWork.alternate.child === completedWork.child;
+    // 之前的fiber，并且 child 相同
+
     var newChildLanes = NoLanes;
     var subtreeFlags = NoFlags;
 
     if (!didBailout) {
+      // 冒泡最早过期时间
       // Bubble up the earliest expiration time.
       if ( (completedWork.mode & ProfileMode) !== NoMode) {
         // In profiling mode, resetChildExpirationTime is also used to reset
@@ -22922,7 +22951,8 @@
         while (_child !== null) {
           newChildLanes = mergeLanes(newChildLanes, mergeLanes(_child.lanes, _child.childLanes));
           subtreeFlags |= _child.subtreeFlags;
-          subtreeFlags |= _child.flags; // Update the return pointer so the tree is consistent. This is a code
+          subtreeFlags |= _child.flags; 
+          // Update the return pointer so the tree is consistent. This is a code
           // smell because it assumes the commit phase is never concurrent with
           // the render phase. Will address during refactor to alternate model.
 
@@ -23065,6 +23095,7 @@
   }
 
   function completeWork(current, workInProgress, renderLanes) {
+    console.log('completeWork', workInProgress?.type)
     var newProps = workInProgress.pendingProps; 
     // Note: This intentionally doesn't check if we're hydrating because comparing
     // to the current tree provider fiber is just as fast and less error-prone.
@@ -23167,6 +23198,7 @@
         }
 
       // Tip: 页面渲染所必须的，即原生DOM组件对应的Fiber节点
+      // 看看他们做了些什么？
       case HostComponent:
         {
           popHostContext(workInProgress);
@@ -23231,12 +23263,15 @@
         {
           var newText = newProps;
 
+          // update phase
           if (current && workInProgress.stateNode != null) {
-            var oldText = current.memoizedProps; // If we have an alternate, that means this is an update and we need
+            var oldText = current.memoizedProps; 
+            // If we have an alternate, that means this is an update and we need
             // to schedule a side-effect to do the updates.
 
             updateHostText$1(current, workInProgress, oldText, newText);
           } else {
+            // mount phase，生成真实dom对象，挂在在 stateNode 属性上
             if (typeof newText !== 'string') {
               if (workInProgress.stateNode === null) {
                 throw new Error('We must have new props for new mounts. This error is likely ' + 'caused by a bug in React. Please file an issue.');
@@ -23255,11 +23290,13 @@
                 markUpdate(workInProgress);
               }
             } else {
+              // 真实的 Dom 实例
               workInProgress.stateNode = createTextInstance(newText, _rootContainerInstance, _currentHostContext, workInProgress);
             }
           }
 
           bubbleProperties(workInProgress);
+          // do what ?
           return null;
         }
 
@@ -24059,6 +24096,8 @@
 
   // TODO: 
   function commitBeforeMutationEffects(root, firstChild) {
+    // firstChild => finishedWork
+    debugger
     focusedInstanceHandle = prepareForCommit(root.containerInfo);
     nextEffect = firstChild;
     commitBeforeMutationEffects_begin(); 
@@ -24078,7 +24117,7 @@
 
       var child = fiber.child;
 
-      // TODO: 什么条件？
+      // TODO: 什么条件？这是为啥？
       if ((fiber.subtreeFlags & BeforeMutationMask) !== NoFlags && child !== null) {
         child.return = fiber;
         nextEffect = child;
@@ -24103,6 +24142,7 @@
       resetCurrentFiber();
       var sibling = fiber.sibling;
 
+      // 
       if (sibling !== null) {
         sibling.return = fiber.return;
         nextEffect = sibling;
@@ -24581,6 +24621,7 @@
   }
 
   function commitLayoutEffectOnFiber(finishedRoot, current, finishedWork, committedLanes) {
+    debugger
     // When updating this function, also update reappearLayoutEffects, which does
     // most of the same things when an offscreen tree goes from hidden -> visible.
     var flags = finishedWork.flags;
@@ -25017,7 +25058,7 @@
   }
 
   function commitPlacement(finishedWork) {
-
+    debugger
 
     var parentFiber = getHostParentFiber(finishedWork); 
     // Note: these two variables *must* always be updated together.
@@ -25483,6 +25524,7 @@
   } 
 
   // This function detects when a Suspense boundary goes from visible to hidden.
+  // 挂在真实Dom到页面上
   function commitMutationEffects(root, finishedWork, committedLanes) {
     inProgressLanes = committedLanes;
     inProgressRoot = root;
@@ -25493,11 +25535,14 @@
     inProgressRoot = null;
   }
 
-  // 
+  // mutationEffects 核心代码逻辑
+  // 递归遍历 MutationEffects
   function recursivelyTraverseMutationEffects(root, parentFiber, lanes) {
     // Deletions effects can be scheduled on any fiber type. They need to happen
     // before the children effects hae fired.
-    // 删除效果可以安排在任何光纤类型上。它们需要在子fiber 被触发之前调用
+
+    // 删除效果可以安排在任何光纤类型上。
+    // 它们需要在子fiber 被触发之前调用
     var deletions = parentFiber.deletions;
 
     if (deletions !== null) {
@@ -25514,10 +25559,10 @@
 
     var prevDebugFiber = getCurrentFiber();
 
+    // 有副作用，就递归 
     if (parentFiber.subtreeFlags & MutationMask) {
       var child = parentFiber.child;
 
-      // 
       while (child !== null) {
         setCurrentFiber(child);
         commitMutationEffectsOnFiber(child, root);
@@ -25529,6 +25574,7 @@
   }
 
   function commitMutationEffectsOnFiber(finishedWork, root, lanes) {
+    debugger
     var current = finishedWork.alternate;
     var flags = finishedWork.flags; 
     // The effect flag should be checked *after* we refine the type of fiber,
@@ -25861,10 +25907,11 @@
     }
   }
 
+  // 判断是要插入节点还是说，其他操作
   function commitReconciliationEffects(finishedWork) {
     // Placement effects (insertions, reorders) can be scheduled on any fiber
-    // type. They needs to happen after the children effects have fired, but
-    // before the effects on this fiber have fired.
+    // type. 
+    // They needs to happen after the children effects have fired, but before the effects on this fiber have fired.
     var flags = finishedWork.flags;
 
     if (flags & Placement) {
@@ -25873,7 +25920,8 @@
         commitPlacement(finishedWork);
       } catch (error) {
         captureCommitPhaseError(finishedWork, finishedWork.return, error);
-      } // Clear the "placement" from effect tag so that we know that this is
+      } 
+      // Clear the "placement" from effect tag so that we know that this is
       // inserted, before any life-cycles like componentDidMount gets called.
       // TODO: findDOMNode doesn't rely on this any more but isMounted does
       // and isMounted is deprecated anyway so we should be able to kill this.
@@ -26989,14 +27037,18 @@
   var RootSuspended = 3;
   var RootSuspendedWithDelay = 4;
   var RootCompleted = 5;
-  var RootDidNotComplete = 6; // Describes where we are in the React execution stack
-
-  var executionContext = NoContext; // The root we're working on
-
-  var workInProgressRoot = null; // The fiber we're working on
-
-  var workInProgress = null; // The lanes we're rendering
-
+  var RootDidNotComplete = 6; 
+  
+  // Describes where we are in the React execution stack
+  var executionContext = NoContext; 
+  
+  // The root we're working on
+  var workInProgressRoot = null; 
+  
+  // The fiber we're working on
+  var workInProgress = null; 
+  
+  // The lanes we're rendering
   var workInProgressRootRenderLanes = NoLanes; // A contextual version of workInProgressRootRenderLanes. It is a superset of
   // the lanes that we started working on at the root. When we enter a subtree
   // that is currently hidden, we add the lanes that would have committed if
@@ -27269,6 +27321,9 @@
   function isUnsafeClassRenderPhaseUpdate(fiber) {
     // Check if this is a render phase update. Only called by class components,
     // which special (deprecated) behavior for UNSAFE_componentWillReceive props.
+    // 检查这是否是渲染阶段更新。仅由类组件调用，这是 UNSAFE_componentWillReceive 属性的特殊（已弃用）行为。
+
+    // （TODO：删除过时的 deferRenderPhaseUpdateToNextBatch 实验。我们决定不启用它。
     return (// TODO: Remove outdated deferRenderPhaseUpdateToNextBatch experiment. We
       // decided not to enable it.
        (executionContext & RenderContext) !== NoContext
@@ -27281,12 +27336,15 @@
   // root has work on. This function is called on every update, and right before
   // exiting a task.
 
-  // 接下来通知Scheduler根据更新的优先级，决定以同步还是异步的方式调度本次更新
+  // 接下来通知 Scheduler 根据更新的优先级，决定以同步还是异步的方式调度本次更新
   function ensureRootIsScheduled(root, currentTime) {
+    debugger
     var existingCallbackNode = root.callbackNode; 
+
     // Check if any lanes are being starved by other work. If so, mark them as
     // expired so we know to work on those next.
-
+    // 检查是否有任何通道因其他工作而处于饥饿状态。
+    // 如果是这样，将它们标记为已过期，因此我们知道接下来要处理这些问题。
     markStarvedLanesAsExpired(root, currentTime); 
     // Determine the next lanes to work on, and their priority.
 
@@ -27301,14 +27359,17 @@
       root.callbackNode = null;
       root.callbackPriority = NoLane;
       return;
-    } // We use the highest priority lane to represent the priority of the callback.
+    } 
+    // We use the highest priority lane to represent the priority of the callback.
+    // 我们使用最高优先级的lane来表示回调的优先级
+    var newCallbackPriority = getHighestPriorityLane(nextLanes); 
 
-
-    var newCallbackPriority = getHighestPriorityLane(nextLanes); // Check if there's an existing task. We may be able to reuse it.
-
+    // Check if there's an existing task. We may be able to reuse it.
+    // 检查是否存在现有任务。我们或许可以重用它
     var existingCallbackPriority = root.callbackPriority;
 
-    if (existingCallbackPriority === newCallbackPriority && // Special case related to `act`. If the currently scheduled task is a
+    if (existingCallbackPriority === newCallbackPriority && 
+    // Special case related to `act`. If the currently scheduled task is a
     // Scheduler task, rather than an `act` task, cancel it and re-scheduled
     // on the `act` queue.
     !( ReactCurrentActQueue$1.current !== null && existingCallbackNode !== fakeActCallbackNode)) {
@@ -27328,14 +27389,18 @@
     if (existingCallbackNode != null) {
       // Cancel the existing callback. We'll schedule a new one below.
       cancelCallback$1(existingCallbackNode);
-    } // Schedule a new callback.
-
+    } 
+    // Schedule a new callback.
 
     var newCallbackNode;
+
+    // 判断什么 ？
 
     if (newCallbackPriority === SyncLane) {
       // Special case: Sync React callbacks are scheduled on a special
       // internal queue
+      // 特殊情况：Sync React 回调被安排在一个特殊的内部队列上
+
       if (root.tag === LegacyRoot) {
         if ( ReactCurrentActQueue$1.isBatchingLegacy !== null) {
           ReactCurrentActQueue$1.didScheduleLegacyUpdate = true;
@@ -27401,24 +27466,28 @@
     root.callbackPriority = newCallbackPriority;
     root.callbackNode = newCallbackNode;
   }
+
   // This is the entry point for every concurrent task, i.e. anything that goes through Scheduler.
 
-
   // Tip: render阶段，Concurrent 并发的，就是异步
+  // 做了哪些事情？
+
   function performConcurrentWorkOnRoot(root, didTimeout) {
     {
       resetNestedUpdateFlag();
     }
     // Since we know we're in a React event, we can clear the current
     // event time. The next update will compute a new event time.
-
+    // 因为我们知道我们正处于 React 事件中，所以我们可以清除当前事件时间。
+    // 下次更新将计算新的事件时间
 
     currentEventTime = NoTimestamp;
     currentEventTransitionLane = NoLanes;
 
     if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
       throw new Error('Should not already be working.');
-    } // Flush any pending passive effects before deciding which lanes to work on,
+    } 
+    // Flush any pending passive effects before deciding which lanes to work on,
     // in case they schedule additional work.
 
 
@@ -27434,7 +27503,8 @@
         // there's a new task, or that there's no remaining work on this root.
         return null;
       }
-    } // Determine the next lanes to work on, using the fields stored
+    } 
+    // Determine the next lanes to work on, using the fields stored
     // on the root.
 
 
@@ -27443,15 +27513,20 @@
     if (lanes === NoLanes) {
       // Defensive coding. This is never expected to happen.
       return null;
-    } // We disable time-slicing in some cases: if the work has been CPU-bound
+    } 
+    
+    // We disable time-slicing in some cases: if the work has been CPU-bound
     // for too long ("expired" work, to prevent starvation), or we're in
     // sync-updates-by-default mode.
+    // 在某些情况下，我们会禁用时间切片：如果工作受 CPU 限制太长时间（“过期”工作，以防止饥饿），
+    // 或者我们处于默认同步更新模式。
+
     // TODO: We only check `didTimeout` defensively, to account for a Scheduler
     // bug we're still investigating. Once the bug in Scheduler is fixed,
     // we can remove this, since we track expiration ourselves.
 
-
     var shouldTimeSlice = !includesBlockingLane(root, lanes) && !includesExpiredLane(root, lanes) && ( !didTimeout);
+
     var exitStatus = shouldTimeSlice ? renderRootConcurrent(root, lanes) : renderRootSync(root, lanes);
 
     if (exitStatus !== RootInProgress) {
@@ -27832,6 +27907,7 @@
 
 
     var finishedWork = root.current.alternate;
+    // finishedWork 就是 workInProgress
     root.finishedWork = finishedWork;
     root.finishedLanes = lanes;
     // TODO: 
@@ -28128,9 +28204,12 @@
     var prevExecutionContext = executionContext;
     executionContext |= RenderContext;
     var prevDispatcher = pushDispatcher(); 
+
     // If the root or lanes have changed, throw out the existing stack
     // and prepare a fresh one. Otherwise we'll continue where we left off.
+    // 如果根或通道发生变化，则丢弃现有堆栈并准备一份新鲜的。否则我们将从上次中断的地方继续。
 
+    // workInProgressRoot 初始化 null
     if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
       {
         if (isDevToolsPresent) {
@@ -28139,17 +28218,17 @@
           if (memoizedUpdaters.size > 0) {
             restorePendingUpdaters(root, workInProgressRootRenderLanes);
             memoizedUpdaters.clear();
-          } // At this point, move Fibers that scheduled the upcoming work from the Map to the Set.
+          } 
+          // At this point, move Fibers that scheduled the upcoming work from the Map to the Set.
           // If we bailout on this work, we'll move them back (like above).
           // It's important to move them now in case the work spawns more work at the same priority with different updaters.
           // That way we can keep the current update and future updates separate.
-
-
           movePendingFibersToMemoized(root, lanes);
         }
       }
 
       workInProgressTransitions = getTransitionsForLanes();
+      // 准备一个 workInprogress 节点
       prepareFreshStack(root, lanes);
     }
 
@@ -28183,13 +28262,15 @@
     workInProgressRoot = null;
     workInProgressRootRenderLanes = NoLanes;
     return workInProgressRootExitStatus;
-  } // The work loop is an extremely hot path. Tell Closure not to inline it.
+  }
+  // The work loop is an extremely hot path. Tell Closure not to inline it.
 
   /** @noinline */
 
 
   function workLoopSync() {
     // Already timed out, so perform work without checking if we need to yield.
+    // 已经超时，因此无需检查是否需要屈服即可执行工作
     while (workInProgress !== null) {
       // 有点像 vue 的 patchVNode
       performUnitOfWork(workInProgress);
@@ -28199,7 +28280,8 @@
   function renderRootConcurrent(root, lanes) {
     var prevExecutionContext = executionContext;
     executionContext |= RenderContext;
-    var prevDispatcher = pushDispatcher(); // If the root or lanes have changed, throw out the existing stack
+    var prevDispatcher = pushDispatcher();
+    // If the root or lanes have changed, throw out the existing stack
     // and prepare a fresh one. Otherwise we'll continue where we left off.
 
     if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
@@ -28322,6 +28404,7 @@
   }
 
   function completeUnitOfWork(unitOfWork) {
+    
     // Attempt to complete the current unit of work, then move to the next
     // sibling. If there are no more siblings, return to the parent fiber.
     var completedWork = unitOfWork;
@@ -28331,7 +28414,8 @@
       // nothing should rely on this, but relying on it here means that we don't
       // need an additional field on the work in progress.
       var current = completedWork.alternate;
-      var returnFiber = completedWork.return; // Check if the work completed or if something threw.
+      var returnFiber = completedWork.return; 
+      // Check if the work completed or if something threw.
 
       // Tip: 
       if ((completedWork.flags & Incomplete) === NoFlags) {
@@ -28342,7 +28426,8 @@
           next = completeWork(current, completedWork, renderLanes$1);
         } else {
           startProfilerTimer(completedWork);
-          next = completeWork(current, completedWork, renderLanes$1); // Update render duration assuming we didn't error.
+          next = completeWork(current, completedWork, renderLanes$1); 
+          // Update render duration assuming we didn't error.
 
           stopProfilerTimerIfRunningAndRecordDelta(completedWork, false);
         }
@@ -28358,8 +28443,8 @@
         // This fiber did not complete because something threw. Pop values off
         // the stack without entering the complete phase. If this is a boundary,
         // capture values if possible.
-        var _next = unwindWork(current, completedWork); // Because this fiber did not complete, don't reset its lanes.
-
+        var _next = unwindWork(current, completedWork);
+        // Because this fiber did not complete, don't reset its lanes.
 
         if (_next !== null) {
           // If completing this work spawned new work, do that next. We'll come
@@ -28421,6 +28506,7 @@
 
   // 作用
   function commitRoot(root, recoverableErrors, transitions) {
+    debugger
     // TODO: This no longer makes any sense. 
     // We already wrap the mutation and layout phases. Should be able to remove.
     var previousUpdateLanePriority = getCurrentUpdatePriority();
@@ -28440,6 +28526,8 @@
 
   // Tip: commit阶段，即 Dom 更新阶段
   function commitRootImpl(root, recoverableErrors, transitions, renderPriorityLevel) {
+    // console.log('commitRootImpl', 'root: ', root)
+    // debugger
     do {
       // `flushPassiveEffects` will call `flushSyncUpdateQueue` at the end, which
       // means `flushPassiveEffects` will sometimes result in additional
@@ -28487,12 +28575,14 @@
 
     if (finishedWork === root.current) {
       throw new Error('Cannot commit the same tree as before. This error is likely caused by ' + 'a bug in React. Please file an issue.');
-    } // commitRoot never returns a continuation; it always finishes synchronously.
+    } 
+    // commitRoot never returns a continuation; it always finishes synchronously.
     // So we can clear these now to allow a new callback to be scheduled.
 
 
     root.callbackNode = null;
-    root.callbackPriority = NoLane; // Check which lanes no longer have any work scheduled on them, and mark
+    root.callbackPriority = NoLane; 
+    // Check which lanes no longer have any work scheduled on them, and mark
     // those as finished.
 
     var remainingLanes = mergeLanes(finishedWork.lanes, finishedWork.childLanes); // Make sure to account for lanes that were updated by a concurrent event
@@ -28507,7 +28597,8 @@
       workInProgressRoot = null;
       workInProgress = null;
       workInProgressRootRenderLanes = NoLanes;
-    } // If there are pending passive effects, schedule a callback to process them.
+    }
+    // If there are pending passive effects, schedule a callback to process them.
     // Do this as early as possible, so it is queued before anything else that
     // might get scheduled in the commit phase. (See #16714.)
     // TODO: Delete all other places that schedule the passive effect callback
@@ -28518,7 +28609,9 @@
     if ((finishedWork.subtreeFlags & PassiveMask) !== NoFlags || (finishedWork.flags & PassiveMask) !== NoFlags) {
       if (!rootDoesHavePassiveEffects) {
         rootDoesHavePassiveEffects = true;
-        pendingPassiveEffectsRemainingLanes = remainingLanes; // workInProgressTransitions might be overwritten, so we want
+        pendingPassiveEffectsRemainingLanes = remainingLanes; 
+        
+        // workInProgressTransitions might be overwritten, so we want
         // to store it in pendingPassiveTransitions until they get processed
         // We need to pass this through as an argument to commitRoot
         // because workInProgressTransitions might have changed between
@@ -28527,12 +28620,13 @@
 
         pendingPassiveTransitions = transitions;
         // 以及为什么要异步（而不是同步）调度。
-        // 在此处，被异步调度的回调函数就是触发useEffect的方法flushPassiveEffects。
+        // 在此处，被异步调度的回调函数就是触发 useEffect 的方法 flushPassiveEffects。
         // 我们接下来讨论useEffect如何被异步调度，以及为什么要异步（而不是同步）调度。
 
         // 这里设置的任务优先级就是 NormalPriority
         scheduleCallback$2(NormalPriority, function () {
-          flushPassiveEffects(); 
+          flushPassiveEffects();
+
           // This render triggered passive effects: release the root cache pool
           // *after* passive effects fire to avoid freeing a cache pool that may
           // be referenced by a node in the tree (HostRoot, Cache boundary etc)
@@ -28540,7 +28634,8 @@
           return null;
         });
       }
-    } // Check if there are any effects in the whole tree.
+    } 
+    // Check if there are any effects in the whole tree.
     // TODO: This is left over from the effect list implementation, where we had
     // to check for the existence of `firstEffect` to satisfy Flow. I think the
     // only other reason this optimization exists is because it affects profiling.
@@ -28558,13 +28653,18 @@
       var prevExecutionContext = executionContext;
       executionContext |= CommitContext; // Reset this to null before calling lifecycles
 
-      ReactCurrentOwner$2.current = null; // The commit phase is broken into several sub-phases. We do a separate pass
+      ReactCurrentOwner$2.current = null; 
+
+      // The commit phase is broken into several sub-phases. We do a separate pass
       // of the effect list for each phase: all mutation effects come before all
       // layout effects, and so on.
+
       // The first phase a "before mutation" phase. We use this phase to read the
       // state of the host tree right before we mutate it. 
       // This is where getSnapshotBeforeUpdate is called.
+
       // getSnapshotBeforeUpdate 生命周期方法会被调用，
+
       // TODO: 为什么会有这样的方法出现？
       var shouldFireAfterActiveInstanceBlur = commitBeforeMutationEffects(root, finishedWork);
 
@@ -28577,7 +28677,9 @@
 
       commitMutationEffects(root, finishedWork, lanes);
 
-      resetAfterCommit(root.containerInfo); // The work-in-progress tree is now the current tree. This must come after
+      resetAfterCommit(root.containerInfo); 
+      
+      // The work-in-progress tree is now the current tree. This must come after
       // the mutation phase, so that the previous tree is still current during
       // componentWillUnmount, but before the layout phase, so that the finished
       // work is current during componentDidMount/Update.
@@ -28588,10 +28690,10 @@
       // The next phase is the layout phase, where we call effects that read
       // 下一阶段是布局阶段，我们称之为效果
 
-      // 我们知道componentWillUnmount会在mutation阶段执行。
-      // 此时current Fiber树还指向前一次更新的Fiber树，在生命周期钩子内获取的DOM还是更新前的。
-      // componentDidMount和componentDidUpdate会在layout阶段执行。
-      // 此时current Fiber树已经指向更新后的Fiber树，在生命周期钩子内获取的DOM就是更新后的。
+      // 我们知道 componentWillUnmount 会在 mutation 阶段执行。
+      // 此时 current Fiber 树还指向前一次更新的Fiber树，在生命周期钩子内获取的DOM还是更新前的。
+      // componentDidMount 和 componentDidUpdate 会在layout阶段执行。
+      // 此时 current Fiber 树已经指向更新后的 Fiber 树，在生命周期钩子内获取的 DOM 就是更新后的。
 
       {
         markLayoutEffectsStarted(lanes);
@@ -28606,7 +28708,8 @@
 
 
       requestPaint();
-      executionContext = prevExecutionContext; // Reset the priority to the previous non-sync value.
+      executionContext = prevExecutionContext; 
+      // Reset the priority to the previous non-sync value.
 
       setCurrentUpdatePriority(previousPriority);
       ReactCurrentBatchConfig$3.transition = prevTransition;
@@ -28642,7 +28745,9 @@
     } // Read this again, since an effect might have updated it
 
 
-    remainingLanes = root.pendingLanes; // Check if there's remaining work on this root
+    remainingLanes = root.pendingLanes; 
+    
+    // Check if there's remaining work on this root
     // TODO: This is part of the `componentDidCatch` implementation. Its purpose
     // is to detect whether something might have called setState inside
     // `componentDidCatch`. The mechanism is known to be flawed because `setState`
@@ -28675,7 +28780,8 @@
 
     {
       onCommitRoot$1();
-    } // Always call this before exiting `commitRoot`, to ensure that any
+    } 
+    // Always call this before exiting `commitRoot`, to ensure that any
     // additional work on this root is scheduled.
 
 
@@ -28772,11 +28878,13 @@
     // `Scheduler.runWithPriority`, which accepts a function. But now we track the
     // priority within React itself, so we can mutate the variable directly.
 
-    // 在flushPassiveEffects方法内部会从全局变量rootWithPendingPassiveEffects获取effectList
+    // 在 flushPassiveEffects 方法内部会从全局变量 rootWithPendingPassiveEffects 获取 effectList
     if (rootWithPendingPassiveEffects !== null) {
       // Cache the root since rootWithPendingPassiveEffects is cleared in
       // flushPassiveEffectsImpl
-      var root = rootWithPendingPassiveEffects; // Cache rootDoesHavePassiveEffectsand clear the remaining lanes flag; it must be reset since this
+      var root = rootWithPendingPassiveEffects; 
+      // Cache rootDoesHavePassiveEffectsand clear the remaining lanes flag; 
+      // it must be reset since this
       // method can be called from various places, not always from commitRoot
       // where the remaining lanes are known
 
@@ -28817,17 +28925,20 @@
     }
   }
 
+  // 
   function flushPassiveEffectsImpl() {
     if (rootWithPendingPassiveEffects === null) {
       return false;
-    } // Cache and clear the transitions flag
+    }
+    // Cache and clear the transitions flag
 
 
     var transitions = pendingPassiveTransitions;
     pendingPassiveTransitions = null;
     var root = rootWithPendingPassiveEffects;
     var lanes = pendingPassiveEffectsLanes;
-    rootWithPendingPassiveEffects = null; // TODO: This is sometimes out of sync with rootWithPendingPassiveEffects.
+    rootWithPendingPassiveEffects = null; 
+    // TODO: This is sometimes out of sync with rootWithPendingPassiveEffects.
     // Figure out why and fix it. It's not causing any known issues (probably
     // because it's only used for profiling), but it's a refactor hazard.
 
@@ -29238,6 +29349,7 @@
     var dummyFiber = null;
 
     beginWork$1 = function (current, unitOfWork, lanes) {
+      console.log('beginWork', unitOfWork?.type)
       // If a component throws an error, we replay it again in a synchronously
       // dispatched event, so that the debugger will treat it as an uncaught
       // error See ReactErrorUtils for more information.
@@ -29887,7 +29999,7 @@
     
     // Effects
     this.flags = NoFlags;
-    this.subtreeFlags = NoFlags;
+    this.subtreeFlags = NoFlags; // 子树的副作用标识，用于什么呢？
     this.deletions = null;
     
     // 调度优先级相关
@@ -30034,7 +30146,9 @@
     workInProgress.child = current.child;
     workInProgress.memoizedProps = current.memoizedProps;
     workInProgress.memoizedState = current.memoizedState;
-    workInProgress.updateQueue = current.updateQueue; // Clone the dependencies object. This is mutated during the render phase, so
+    workInProgress.updateQueue = current.updateQueue;
+
+    // Clone the dependencies object. This is mutated during the render phase, so
     // it cannot be shared with the current fiber.
 
     var currentDependencies = current.dependencies;
@@ -30535,7 +30649,8 @@
 
     {
       var initialCache = createCache();
-      retainCache(initialCache); // The pooledCache is a fresh cache instance that is used temporarily
+      retainCache(initialCache); 
+      // The pooledCache is a fresh cache instance that is used temporarily
       // for newly mounted boundaries during a render. In general, the
       // pooledCache is always cleared from the root at the end of a render:
       // it is either released when render commits, or moved to an Offscreen
@@ -30690,13 +30805,13 @@
   }
   
   // Tip: 更新方法
-  // current$1 是哪个 fiber node
   function updateContainer(element, container, parentComponent, callback) {
     {
       onScheduleRoot(container, element);
     }
 
-    var current$1 = container.current;
+    var current$1 = container.current; // current
+    // current$1 是 uninitializedFiber fiber
     // 记录当前时间
     var eventTime = requestEventTime();
     // 获取 react lane 优先级
@@ -30727,8 +30842,10 @@
     var update = createUpdate(eventTime, lane); 
     // Caution: React DevTools currently depends on this property
     // being called "element".
+    // 注意：React DevTools 目前依赖于这个被称为“element”的属性
 
-    // TODO: 这就是我们在 Update 一节介绍的，对于 HostRoot，payload为ReactDOM.render的第一个传参。
+    // TODO: 这就是我们在 Update 一节介绍的，对于 HostRoot，payload.element 为 ReactDOM.render的第一个传参。
+
     update.payload = {
       element: element
     };
@@ -30745,12 +30862,13 @@
     }
 
     // 将生成的 update 加入 updateQueue
+    // root 是啥？
     var root = enqueueUpdate$1(current$1, update, lane);
 
     // 直接调度更新，并没有添加优先级参数
     if (root !== null) {
       scheduleUpdateOnFiber(root, current$1, lane, eventTime);
-      entangleTransitions(root, current$1, lane);
+      entangleTransitions(root, current$1, lane); // 纠缠过渡
     }
 
     return lane;
@@ -31241,7 +31359,7 @@
 
   // Tip: 
   function createRoot(container, options) {
-    debugger
+    // debugger
     if (!isValidContainer(container)) {
       throw new Error('createRoot(...): Target container is not a DOM element.');
     }
@@ -31426,7 +31544,7 @@
     // legacy API.
   }
 
-  // container指ReactDOM.render的第二个参数（即应用挂载的DOM节点）
+  // container 指 ReactDOM.render的第二个参数（即应用挂载的DOM节点）
   function legacyCreateRootFromDOMContainer(container, initialChildren, parentComponent, callback, isHydrationContainer) {
     if (isHydrationContainer) {
       if (typeof callback === 'function') {

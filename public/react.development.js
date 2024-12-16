@@ -2538,7 +2538,7 @@
   }
 
   // 为了能在O(1)复杂度找到两个队列中时间最早的那个任务，
-  // Scheduler使用 小顶堆 实现了优先级队列。
+  // Scheduler 使用 小顶堆 实现了优先级队列。
   var enableSchedulerDebugging = false;
   var enableProfiling = false;
   var frameYieldMs = 5;
@@ -2595,7 +2595,8 @@
       var leftIndex = (index + 1) * 2 - 1;
       var left = heap[leftIndex];
       var rightIndex = leftIndex + 1;
-      var right = heap[rightIndex]; // If the left or right node is smaller, swap with the smaller of those.
+      var right = heap[rightIndex]; 
+      // If the left or right node is smaller, swap with the smaller of those.
 
       if (compare(left, node) < 0) {
         if (rightIndex < length && compare(right, left) < 0) {
@@ -2791,7 +2792,7 @@
         currentTime = getCurrentTime();
 
         // 当注册的回调函数执行后的返回值 continuationCallback 为function，
-      // 会将 continuationCallback 作为当前任务的回调函数。
+        // 会将 continuationCallback 作为当前任务的回调函数。
         if (typeof continuationCallback === 'function') {
           currentTask.callback = continuationCallback;
         } else {
