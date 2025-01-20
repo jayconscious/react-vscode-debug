@@ -35,9 +35,13 @@ import "./App.css";
 
 
 export default function App() {
+  const [num, add] = useState(0);
   return (
     <div>
-      <p>111</p>
+      <p onClick={() => add(num + 1)} style={{ backgroundColor: num > 1 ? 'red' : 'blue' }}>{num}</p>
+      <span>
+        <i></i>
+      </span>
     </div>
   )
 }

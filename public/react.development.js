@@ -2769,6 +2769,7 @@
   }
 
   // TODO: 
+  // render entry
   function workLoop(hasTimeRemaining, initialTime) {
     var currentTime = initialTime;
     advanceTimers(currentTime);
@@ -2972,8 +2973,6 @@
       // taskQueue：保存已就绪任务
       push(taskQueue, newTask);
       // wait until the next time we yield.
-
-
       if (!isHostCallbackScheduled && !isPerformingWork) {
         isHostCallbackScheduled = true;
         requestHostCallback(flushWork);
