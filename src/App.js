@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import "./App.css";
 // import DemoUseContext from './components/DemoUseContext';
 
@@ -33,15 +33,39 @@ import "./App.css";
 //   </div>
 // }
 
-
 export default function App() {
-  const [num, add] = useState(0);
+  // 得分榜
+  const [list, setList] = useState([
+    { name: 'kobe', score: '30' },
+    { name: 'james', score: '40' },
+    { name: 'wade', score: '20' },
+  ])
+
+  // 刷新
+  const handleClick = useCallback(() => {
+    list.forEach(item => {
+      if (item.name === 'james') {
+        item.score = '61'
+      }
+    })
+    setList([...list])
+  }, [list])
+
+  const totalScore = useMemo(() => {
+    return list.reduce((sum, item) => {
+      return sum + Number(item.score)
+    }, 0)
+  }, [list])
+
+  const renderList = list.map(item => {
+    return <div key={item.name}>{item.name + ': ' + item.score}</div>
+  })
+  
   return (
-    <div>
-      <p onClick={() => add(num + 1)} style={{ backgroundColor: num > 1 ? 'red' : 'blue' }}>{num}</p>
-      <span>
-        <i></i>
-      </span>
+    <div className='Index'>
+      <div>得分榜：{totalScore}</div>
+      <div className='itemBox'>{renderList}</div>
+      <button onClick={handleClick}>Flash</button>
     </div>
   )
 }

@@ -14751,6 +14751,7 @@
     return instance;
   }
 
+  // 调用 class 组件相关方法
   function callComponentWillMount(workInProgress, instance) {
     var oldState = instance.state;
 
@@ -14798,6 +14799,7 @@
   } // Invokes the mount life-cycles on a previously never rendered instance.
 
 
+  // 加载 class 组件
   function mountClassInstance(workInProgress, ctor, newProps, renderLanes) {
     {
       checkClassInstance(workInProgress, ctor, newProps);
@@ -15249,7 +15251,7 @@
   // live outside of this function.
 
 
-  // Tip: 
+  // Tip: diff
   function ChildReconciler(shouldTrackSideEffects) { // 是否跟踪副作用
     function deleteChild(returnFiber, childToDelete) {
       if (!shouldTrackSideEffects) {
@@ -16035,14 +16037,18 @@
     // TODO: 做了哪些事情？
     // mount 阶段 currentFirstChild == null
     function reconcileSingleElement(returnFiber, currentFirstChild, element, lanes) {
-      var key = element.key; // element 即 newChild
-      var child = currentFirstChild;
+      debugger
+      var key = element.key;
+      // element 即 newChild
 
-      // 判断 上次是否有Dom节点存在
+      var child = currentFirstChild;
+      // 优先判断子元素是否存在
+      // 判断 优先是否有 fiber 节点存在
       while (child !== null) {
         // TODO: If key === null and child.key === null, then this only applies to
         // the first item in the list.
-        // 节点是否可以服用，有限比较 key 是否相同？
+        // 节点是否可以复用，
+        // 优先比较 key 是否相同
         if (child.key === key) {
           var elementType = element.type;
 
@@ -16060,13 +16066,18 @@
               return existing;
             }
           } else {
-            // type 相同
-            if (child.elementType === elementType || ( // Keep this check inline so it only runs on the false path:
-             isCompatibleFamilyForHotReloading(child, element) ) || // Lazy types should reconcile their resolved type.
+            // 然后比较 type 相同
+            if (child.elementType === elementType || (
+            // Keep this check inline so it only runs on the false path:
+            isCompatibleFamilyForHotReloading(child, element) ) || 
+            // Lazy types should reconcile their resolved type.
             // We need to do this after the Hot Reloading check above,
             // because hot reloading has different semantics than prod because
             // it doesn't resuspend. So we can't let the call below suspend.
-            typeof elementType === 'object' && elementType !== null && elementType.$$typeof === REACT_LAZY_TYPE && resolveLazy(elementType) === child.type) {
+            typeof elementType === 'object' && elementType !== null 
+            && elementType.$$typeof === REACT_LAZY_TYPE 
+            && resolveLazy(elementType) === child.type) {
+              // 为啥？
               deleteRemainingChildren(returnFiber, child.sibling);
 
               var _existing = useFiber(child, element.props);
@@ -16082,8 +16093,9 @@
               // 返回这个复用的节点
               return _existing;
             }
-          } // Didn't match.
-
+          } 
+          // Didn't match.
+          
           // 将该fiber及其兄弟fiber标记为删除
           // 当child !== null 且 key相同且type不同时
           // 执行 deleteRemainingChildren 将 child及其兄弟fiber都标记删除
@@ -16101,6 +16113,7 @@
         child = child.sibling;
       }
 
+      // 是否是 REACT_FRAGMENT_TYPE
       if (element.type === REACT_FRAGMENT_TYPE) {
         var created = createFiberFromFragment(element.props.children, returnFiber.mode, lanes, element.key);
         created.return = returnFiber;
@@ -16149,6 +16162,7 @@
 
 
     function reconcileChildFibers(returnFiber, currentFirstChild, newChild, lanes) {
+      debugger
       // This function is not recursive. 这个函数不是递归的
 
       // If the top level item is an array, we treat it as a set of children,
@@ -16168,7 +16182,7 @@
       // jsx 对象？
       if (typeof newChild === 'object' && newChild !== null) {
         switch (newChild.$$typeof) {
-          case REACT_ELEMENT_TYPE:
+          case REACT_ELEMENT_TYPE:  // 单个元素
             // reconcileSingleElement 返回一个由react元素 创建的fiber
             return placeSingleChild(reconcileSingleElement(returnFiber, currentFirstChild, newChild, lanes));
 
@@ -16983,6 +16997,11 @@
     // clone, or a work-in-progress hook from a previous render pass that we can
     // use as a base. When we reach the end of the base list, we must switch to
     // the dispatcher used for mounts.
+    // 此函数用于更新和由 a 触发的重新渲染
+    // 渲染阶段更新。它假设有一个当前的钩子我们可以
+    // 克隆，或者我们可以从之前的渲染通道中获取正在进行的钩子
+    // 用作基础。当我们到达基本列表的末尾时，我们必须切换到
+    // 用于挂载的调度程序
     var nextCurrentHook;
 
     if (currentHook === null) {
@@ -17607,6 +17626,7 @@
     }
   }
 
+  // React 使用了一个叫做 updateEffect 的机制来实现 Hook 的调度和依赖更新。
   function updateEffect(create, deps) {
     return updateEffectImpl(Passive, Passive$1, create, deps);
   }
@@ -17732,6 +17752,7 @@
     return nextValue;
   }
 
+  // hook.memoizedState 存储的是啥
   function updateMemo(nextCreate, deps) {
     var hook = updateWorkInProgressHook();
     var nextDeps = deps === undefined ? null : deps;
@@ -20504,6 +20525,7 @@
     }
   }
 
+  // 更新函数组件
   function updateFunctionComponent(current, workInProgress, Component, nextProps, renderLanes) {
     {
       if (workInProgress.type !== workInProgress.elementType) {
@@ -20902,6 +20924,7 @@
     return null;
   }
 
+  // 类组件处理
   function mountLazyComponent(_current, workInProgress, elementType, renderLanes) {
     resetSuspendedCurrentOnMountInLegacyMode(_current, workInProgress);
     var props = workInProgress.pendingProps;
@@ -30109,7 +30132,9 @@
     
     // Effects
     this.flags = NoFlags;
-    this.subtreeFlags = NoFlags; // 子树的副作用标识，用于什么呢？
+    // Q: 子树的副作用标识，用于什么呢？
+    // A: 用于表示子节点是否有副作用
+    this.subtreeFlags = NoFlags;
     this.deletions = null;
     
     // 调度优先级相关
