@@ -60,12 +60,13 @@ export default function App() {
   const renderList = list.map(item => {
     return <div key={item.name}>{item.name + ': ' + item.score}</div>
   })
-  
+
   return (
-    <div className='Index'>
-      <div>得分榜：{totalScore}</div>
-      <div className='itemBox'>{renderList}</div>
+    <>
+      <div className='Index'>
+        {renderList}
+      </div>
       <button onClick={handleClick}>Flash</button>
-    </div>
+    </>
   )
 }

@@ -13780,7 +13780,7 @@
 
   // 将个 update 插入到 updateQueue 队列上
   function enqueueUpdate$1(fiber, update, lane) {
-    debugger
+    // debugger
     var updateQueue = fiber.updateQueue;
 
     if (updateQueue === null) {
@@ -13940,7 +13940,7 @@
 
   // 将 jsx 函数执行转为 react元素
   function getStateFromUpdate(workInProgress, queue, update, prevState, nextProps, instance) {
-    debugger
+    // debugger
     switch (update.tag) {
       case ReplaceState:
         {
@@ -15367,6 +15367,9 @@
     function placeSingleChild(newFiber) {
       // This is simpler for the single child case. We only need to do a
       // placement for inserting new children.
+
+      // 对于独生子女的情况来说，这更简单。我们只需要做一个插入新子项的位置。
+
       if (shouldTrackSideEffects && newFiber.alternate === null) {
         newFiber.flags |= Placement;
       }
@@ -15396,6 +15399,7 @@
       }
 
       if (current !== null) {
+        // 找到则复用节点
         if (current.elementType === elementType || ( // Keep this check inline so it only runs on the false path:
           isCompatibleFamilyForHotReloading(current, element)) || // Lazy types should reconcile their resolved type.
           // We need to do this after the Hot Reloading check above,
@@ -15417,6 +15421,7 @@
       } // Insert
 
 
+      // 否则创建节点
       var created = createFiberFromElement(element, returnFiber.mode, lanes);
       created.ref = coerceRef(returnFiber, current, element);
       created.return = returnFiber;
@@ -15666,10 +15671,14 @@
 
     // start
     function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren, lanes) {
+      debugger
       // This algorithm can't optimize by searching from both ends since we
       // don't have backpointers on fibers. I'm trying to see how far we can get
       // with that model. If it ends up not being worth the tradeoffs, we can
       // add it later.
+      // 这个算法不能通过从两端搜索来优化，因为我们 fiber 上没有反向指针。
+      // 我想看看我们能走多远使用该模型。如果最终不值得进行权衡，我们可以稍后添加。
+
       // Even with a two ended optimization, we'd want to optimize for the case
       // where there are few changes and brute force the comparison instead of
       // going for the Map. It'd like to explore hitting that path first in
@@ -15681,8 +15690,18 @@
       // (adding everything to a Map) in for every insert/move.
       // If you change this code, also update reconcileChildrenIterator() which
       // uses the same algorithm.
+
+      // 即使有两端优化，我们也希望针对这种情况进行优化几乎没有什么变化并强制比较而不是去寻找地图。
+      // 它想首先探索这条道路仅前向模式，只有在我们注意到需要时才使用 Map 多多展望未来。
+      // 这不能像两端一样处理反转搜索，但这很不寻常。此外，对于两端优化
+      // 在 Iterables 上工作，我们需要复制整个集合。
+      // 在第一次迭代中，我们将忍受遇到不好的情况
+      //（将所有内容添加到映射中）每次插入/移动。
+      // 如果更改此代码，请同时更新 reconcileChildrenIterator() 使用相同的算法。
+
       {
         // First, validate keys.
+        // 过滤出有效的 key, 是一个 set 集合
         var knownKeys = null;
 
         for (var i = 0; i < newChildren.length; i++) {
@@ -15691,20 +15710,46 @@
         }
       }
 
+      // 这些是来标记什么的 ？
+
       var resultingFirstChild = null;
+      // 最终返回的新 Fiber 链表的头节点。
+      // 用于构建新的 Fiber 树。
+
       var previousNewFiber = null;
+      // 当前正在构建的新 Fiber 链表的上一个节点。
+      // 用于连接新 Fiber 节点，形成链表。
+
       var oldFiber = currentFirstChild;
+      // 当前正在对比的旧 Fiber 节点。
+      // 从 currentFirstChild 开始，逐步遍历旧 Fiber 链表。
+
       var lastPlacedIndex = 0;
+      // 记录最后一个被“放置”的节点的索引。
+      // 用于优化节点的移动操作，避免不必要的 DOM 操作。
+
       var newIdx = 0;
+      // 当前新节点的索引。
+      // 用于遍历新节点列表。
+      
       var nextOldFiber = null;
 
+      // oldFiber 存在，遍历 react element ast
+      // 判断节点 是否可用
       for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
+
+        // Todo: 这是干啥
+        // Fiber.index 挂载的是当前 Fiber 节点在其兄弟节点中的位置信息。它是一个数字，表示当前节点在父节点的子节点列表中的顺序。例如：
+        // 如果一个父节点有 3 个子节点，那么这些子节点的 index 分别是 0、1 和 2。
+
         if (oldFiber.index > newIdx) {
           nextOldFiber = oldFiber;
           oldFiber = null;
         } else {
           nextOldFiber = oldFiber.sibling;
         }
+
+        // Todo: do what ?
 
         var newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx], lanes);
 
@@ -15787,10 +15832,11 @@
         }
 
         return resultingFirstChild;
-      } // Add all children to a key map for quick lookups.
+      } 
 
 
-      // oldFiber 存入以 key为key，oldFiber为value的Map中。
+      // Add all children to a key map for quick lookups.
+      // oldFiber 存入以 key 为 key，oldFiber 为 value的 Map 中。
       var existingChildren = mapRemainingChildren(returnFiber, oldFiber);
       // console.log('existingChildren', existingChildren)
 
@@ -15836,7 +15882,8 @@
       }
 
       return resultingFirstChild;
-    } // end
+    }
+    // end
 
     function reconcileChildrenIterator(returnFiber, currentFirstChild, newChildrenIterable, lanes) {
       // This is the same implementation as reconcileChildrenArray(),
@@ -16055,7 +16102,7 @@
     // TODO: 做了哪些事情？
     // mount 阶段 currentFirstChild == null
     function reconcileSingleElement(returnFiber, currentFirstChild, element, lanes) {
-      debugger
+      // debugger
       var key = element.key;
       // element 即 newChild
 
@@ -22639,7 +22686,7 @@
 
   // 
   function beginWork(current, workInProgress, renderLanes) {
-    debugger
+    // debugger
     {
       if (workInProgress._debugNeedsRemount && current !== null) {
         // This will restart the begin phase with a new fiber.
@@ -24245,7 +24292,7 @@
   // TODO: 
   function commitBeforeMutationEffects(root, firstChild) {
     // firstChild => finishedWork
-    debugger
+    // debugger
     focusedInstanceHandle = prepareForCommit(root.containerInfo);
     nextEffect = firstChild;
     commitBeforeMutationEffects_begin();
@@ -24771,7 +24818,7 @@
   }
 
   function commitLayoutEffectOnFiber(finishedRoot, current, finishedWork, committedLanes) {
-    debugger
+    // debugger
     // When updating this function, also update reappearLayoutEffects, which does
     // most of the same things when an offscreen tree goes from hidden -> visible.
     var flags = finishedWork.flags;
@@ -25209,7 +25256,7 @@
   }
 
   function commitPlacement(finishedWork) {
-    debugger
+    // debugger
 
     var parentFiber = getHostParentFiber(finishedWork);
     // Note: these two variables *must* always be updated together.
@@ -27496,7 +27543,7 @@
 
   // 接下来通知 Scheduler 根据更新的优先级，决定以同步还是异步的方式调度本次更新
   function ensureRootIsScheduled(root, currentTime) {
-    debugger
+    // debugger
     var existingCallbackNode = root.callbackNode;
 
     // Check if any lanes are being starved by other work. If so, mark them as
@@ -28534,7 +28581,7 @@
   }
 
   function performUnitOfWork(unitOfWork) {
-    debugger
+    // debugger
     // The current, flushed, state of this fiber is the alternate. Ideally
     // nothing should rely on this, but relying on it here means that we don't
     // need an additional field on the work in progress.
@@ -28680,7 +28727,7 @@
 
   // 作用
   function commitRoot(root, recoverableErrors, transitions) {
-    debugger
+    // debugger
     // TODO: This no longer makes any sense. 
     // We already wrap the mutation and layout phases. Should be able to remove.
     var previousUpdateLanePriority = getCurrentUpdatePriority();
@@ -28701,7 +28748,7 @@
   // Tip: commit阶段，即 Dom 更新阶段
   function commitRootImpl(root, recoverableErrors, transitions, renderPriorityLevel) {
     // console.log('commitRootImpl', 'root: ', root)
-    debugger
+    // debugger
     do {
       // `flushPassiveEffects` will call `flushSyncUpdateQueue` at the end, which
       // means `flushPassiveEffects` will sometimes result in additional
