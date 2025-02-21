@@ -15303,6 +15303,7 @@
     }
 
     function mapRemainingChildren(returnFiber, currentFirstChild) {
+      // 如果 key 不存在的话，则使用 index，作为 key
       // Add the remaining children to a temporary map so that we can find them by
       // keys quickly. Implicit (null) keys get added to this set with their index
       // instead.
@@ -15334,6 +15335,7 @@
       return clone;
     }
 
+    // 具体作用？
     function placeChild(newFiber, lastPlacedIndex, newIndex) {
       newFiber.index = newIndex;
 
@@ -15345,10 +15347,10 @@
       }
 
       var current = newFiber.alternate;
-
       if (current !== null) {
         var oldIndex = current.index;
 
+        // 这表明这个节点移动了
         if (oldIndex < lastPlacedIndex) {
           // This is a move.
           newFiber.flags |= Placement;
@@ -15512,8 +15514,11 @@
       return null;
     }
 
+    // 什么情况下返回有一个可以服用fiber，什么情况直接返回 null
+    // 因为在返回 null 的情况，第一个循环就直接 break 了。
     function updateSlot(returnFiber, oldFiber, newChild, lanes) {
       // Update the fiber if the keys match, otherwise return null.
+      // 如果键匹配则更新 Fiber，否则返回 null
       var key = oldFiber !== null ? oldFiber.key : null;
 
       if (typeof newChild === 'string' && newChild !== '' || typeof newChild === 'number') {
@@ -15527,6 +15532,8 @@
         return updateTextNode(returnFiber, oldFiber, '' + newChild, lanes);
       }
 
+      // Q: 这里只判断了，newChild 是对象的这种情况，那么问题来了，可能是数组吗？
+      // A: 下面有判断哦
       if (typeof newChild === 'object' && newChild !== null) {
         switch (newChild.$$typeof) {
           case REACT_ELEMENT_TYPE:
@@ -15555,11 +15562,14 @@
             }
         }
 
+        // 如果是数组的话
         if (isArray(newChild) || getIteratorFn(newChild)) {
+          // oldFiber.key !== null，直接返回 null ？
+          // Q: 怎么理解？
           if (key !== null) {
             return null;
           }
-
+          // 不是的话，直接创建节点返回？
           return updateFragment(returnFiber, oldFiber, newChild, lanes, null);
         }
 
@@ -15677,6 +15687,7 @@
       // with that model. If it ends up not being worth the tradeoffs, we can
       // add it later.
       // 这个算法不能通过从两端搜索来优化，因为我们 fiber 上没有反向指针。
+      // Q：为什么不设计反向指针呢？
       // 我想看看我们能走多远使用该模型。如果最终不值得进行权衡，我们可以稍后添加。
 
       // Even with a two ended optimization, we'd want to optimize for the case
@@ -15711,31 +15722,27 @@
       }
 
       // 这些是来标记什么的 ？
-
       var resultingFirstChild = null;
-      // 最终返回的新 Fiber 链表的头节点。
-      // 用于构建新的 Fiber 树。
+      // 最终返回的新 Fiber 链表的头节点。用于构建新的 Fiber 树。
 
       var previousNewFiber = null;
-      // 当前正在构建的新 Fiber 链表的上一个节点。
-      // 用于连接新 Fiber 节点，形成链表。
+      // 当前正在构建的新 Fiber 链表的上一个节点。用于连接新 Fiber 节点，形成链表。
 
       var oldFiber = currentFirstChild;
-      // 当前正在对比的旧 Fiber 节点。
-      // 从 currentFirstChild 开始，逐步遍历旧 Fiber 链表。
+      // 当前正在对比的旧 Fiber 节点。从 currentFirstChild 开始，逐步遍历旧 Fiber 链表。
 
       var lastPlacedIndex = 0;
-      // 记录最后一个被“放置”的节点的索引。
-      // 用于优化节点的移动操作，避免不必要的 DOM 操作。
+      // 记录最后一个被“放置”的节点的索引。用于优化节点的移动操作，避免不必要的 DOM 操作。
 
       var newIdx = 0;
-      // 当前新节点的索引。
-      // 用于遍历新节点列表。
+      // 当前新节点的索引。用于遍历新节点列表。
       
       var nextOldFiber = null;
 
       // oldFiber 存在，遍历 react element ast
       // 判断节点 是否可用
+      // Q: 这个循环的作用是什么呢？
+      // A: 
       for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
 
         // Todo: 这是干啥
@@ -15743,14 +15750,17 @@
         // 如果一个父节点有 3 个子节点，那么这些子节点的 index 分别是 0、1 和 2。
 
         if (oldFiber.index > newIdx) {
+          // 如果发生了移动，将 oldFiber => nextOldFiber，oldFiber => null
           nextOldFiber = oldFiber;
           oldFiber = null;
         } else {
+          // 如果没有发生偏移，则 oldFiber，指正向下移动
           nextOldFiber = oldFiber.sibling;
         }
 
         // Todo: do what ?
-
+        // 第一种情况：如果 key 相同，则复用节点
+        // 第二种情况：如果 key 相同 type 不同
         var newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx], lanes);
 
         if (newFiber === null) {
@@ -15758,10 +15768,15 @@
           // unfortunate because it triggers the slow path all the time. We need
           // a better way to communicate whether this was a miss or null,
           // boolean, undefined, etc.
+
+          // 这会在空槽（如空子项）上中断。那是不幸的是，因为它总是触发慢速路径。
+          // 我们需要一种更好的方式来传达这是缺失还是 null、布尔值、未定义等。
+
           if (oldFiber === null) {
             oldFiber = nextOldFiber;
           }
 
+          // 如果没有找到可以服用的节点就跳出循环了，
           break;
         }
 
@@ -15788,10 +15803,13 @@
           previousNewFiber.sibling = newFiber;
         }
 
+        // 上一个新节点
         previousNewFiber = newFiber;
         oldFiber = nextOldFiber;
-      }
+      } // for end
 
+      // Todo: 第一轮循环结束之后，先判断 newChildren 是否遍历完。
+      // 如果遍历完，则 标记删除 oldFiber 中剩余节点，将 resultingFirstChild 作为头结点返回。
       if (newIdx === newChildren.length) {
         // We've reached the end of the new children. We can delete the rest.
         deleteRemainingChildren(returnFiber, oldFiber);
@@ -15804,6 +15822,9 @@
         return resultingFirstChild;
       }
 
+      // Todo: 再判断 oldFiber 是否遍历，把 newChildren 的剩余节点，
+      // 接在 resultingFirstChild 后面
+
       if (oldFiber === null) {
         // If we don't have any more existing children we can choose a fast path
         // since the rest will all be insertions.
@@ -15814,6 +15835,7 @@
             continue;
           }
 
+          // 
           lastPlacedIndex = placeChild(_newFiber, lastPlacedIndex, newIdx);
 
           if (previousNewFiber === null) {
@@ -15835,8 +15857,10 @@
       } 
 
 
-      // Add all children to a key map for quick lookups.
+      // Add the remaining children to a key map for quick lookups.
       // oldFiber 存入以 key 为 key，oldFiber 为 value的 Map 中。
+      // 将剩余所有子项添加到关键映射中以进行快速查找
+
       var existingChildren = mapRemainingChildren(returnFiber, oldFiber);
       // console.log('existingChildren', existingChildren)
 
@@ -15955,11 +15979,16 @@
 
         var newFiber = updateSlot(returnFiber, oldFiber, step.value, lanes);
 
+        // 什么情况下回返回 null
         if (newFiber === null) {
           // TODO: This breaks on empty slots like null children. That's
           // unfortunate because it triggers the slow path all the time. We need
           // a better way to communicate whether this was a miss or null,
           // boolean, undefined, etc.
+
+          // 这会在空槽（如空子项）上中断。那是不幸的是，它总是触发慢速路径。我们需要
+          // 一种更好的方式来传达这是未命中还是空，布尔值、未定义等
+
           if (oldFiber === null) {
             oldFiber = nextOldFiber;
           }
@@ -15975,11 +16004,13 @@
           }
         }
 
+        // 如果 index 不变的话，
+        // lastPlacedIndex 就是 index的值，如果移动的话
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
 
         if (previousNewFiber === null) {
           // TODO: Move out of the loop. This only happens for the first run.
-          resultingFirstChild = newFiber;
+          resultingFirstChild = newFiber; // head
         } else {
           // TODO: Defer siblings if we're not at the right index for this slot.
           // I.e. if we had null values before, then we want to defer this
