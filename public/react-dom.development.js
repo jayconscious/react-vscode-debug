@@ -3945,6 +3945,8 @@
    * @return {DOMEventTarget} Target node.
    */
 
+  //  nativeEvent 原生事件 引用
+  //  Todo: 待深入
   function getEventTarget(nativeEvent) {
     // Fallback to nativeEvent.srcElement for IE9
     // https://github.com/facebook/react/issues/12506
@@ -4134,12 +4136,13 @@
     return listener;
   }
 
-  var passiveBrowserEventsSupported = false; // Check if browser support events with passive listeners
+  var passiveBrowserEventsSupported = false; 
+  // Check if browser support events with passive listeners
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Safely_detecting_option_support
-
   if (canUseDOM) {
     try {
-      var options = {}; // $FlowFixMe: Ignore Flow complaining about needing a value
+      var options = {}; 
+      // $FlowFixMe: Ignore Flow complaining about needing a value
 
       Object.defineProperty(options, 'passive', {
         get: function () {
@@ -6836,13 +6839,16 @@
     target.addEventListener(eventType, listener, true);
     return listener;
   }
+
   function addEventCaptureListenerWithPassiveFlag(target, eventType, listener, passive) {
     target.addEventListener(eventType, listener, {
       capture: true,
       passive: passive
     });
     return listener;
+    // Todo: 这个返回的是啥？
   }
+
   function addEventBubbleListenerWithPassiveFlag(target, eventType, listener, passive) {
     target.addEventListener(eventType, listener, {
       passive: passive
@@ -6976,11 +6982,13 @@
      * normalizing browser quirks. Subclasses do not necessarily have to implement a
      * DOM interface; custom application-specific events can also subclass this.
      */
+    // Todo: SyntheticBaseEvent 事件合成基类
+
     function SyntheticBaseEvent(reactName, reactEventType, targetInst, nativeEvent, nativeEventTarget) {
       this._reactName = reactName;
       this._targetInst = targetInst;
       this.type = reactEventType;
-      this.nativeEvent = nativeEvent;
+      this.nativeEvent = nativeEvent;  // 原生事件对象
       this.target = nativeEventTarget;
       this.currentTarget = null;
 
@@ -7010,6 +7018,7 @@
       return this;
     }
 
+    // 重写，覆盖
     assign(SyntheticBaseEvent.prototype, {
       preventDefault: function () {
         this.defaultPrevented = true;
@@ -7071,6 +7080,7 @@
    */
 
 
+  // 
   var EventInterface = {
     eventPhase: 0,
     bubbles: 0,
@@ -7081,6 +7091,7 @@
     defaultPrevented: 0,
     isTrusted: 0
   };
+
   var SyntheticEvent = createSyntheticEvent(EventInterface);
 
   var UIEventInterface = assign({}, EventInterface, {
@@ -7112,6 +7123,8 @@
    */
 
 
+  // 定义事件标准对象
+  // 拉齐接口，抹平底层差异性
   var MouseEventInterface = assign({}, UIEventInterface, {
     screenX: 0,
     screenY: 0,
@@ -7293,11 +7306,13 @@
       if (key !== 'Unidentified') {
         return key;
       }
-    } // Browser does not implement `key`, polyfill as much of it as we can.
+    } 
+    // Browser does not implement `key`, polyfill as much of it as we can.
 
 
     if (nativeEvent.type === 'keypress') {
-      var charCode = getEventCharCode(nativeEvent); // The enter-key is technically both printable and non-printable and can
+      var charCode = getEventCharCode(nativeEvent); 
+      // The enter-key is technically both printable and non-printable and can
       // thus be captured by `keypress`, no other non-printable key should.
 
       return charCode === 13 ? 'Enter' : String.fromCharCode(charCode);
@@ -7311,33 +7326,47 @@
 
     return '';
   }
+
+
   /**
    * Translation from modifier key to the associated property in the event.
    * @see http://www.w3.org/TR/DOM-Level-3-Events/#keys-Modifiers
    */
-
 
   var modifierKeyToProp = {
     Alt: 'altKey',
     Control: 'ctrlKey',
     Meta: 'metaKey',
     Shift: 'shiftKey'
-  }; // Older browsers (Safari <= 10, iOS Safari <= 10.2) do not support
+  }; 
+  
+  // Older browsers (Safari <= 10, iOS Safari <= 10.2) do not support
   // getModifierState. If getModifierState is not supported, we map it to a set of
   // modifier keys exposed by the event. In this case, Lock-keys are not supported.
 
+  // 事件兼容处理
   function modifierStateGetter(keyArg) {
     var syntheticEvent = this;
     var nativeEvent = syntheticEvent.nativeEvent;
 
     if (nativeEvent.getModifierState) {
+      // 执行原生事件
       return nativeEvent.getModifierState(keyArg);
     }
+
+    // var modifierKeyToProp = {
+    //   Alt: 'altKey',
+    //   Control: 'ctrlKey',
+    //   Meta: 'metaKey',
+    //   Shift: 'shiftKey'
+    // }; 
 
     var keyProp = modifierKeyToProp[keyArg];
     return keyProp ? !!nativeEvent[keyProp] : false;
   }
 
+  // KeyboardEvent.getModifierState() 方法返回指定修饰键的当前状态：
+  // 如果修饰键处于活动状态（即修饰键被按下或锁定），则返回 true，否则返回 false。
   function getEventModifierState(nativeEvent) {
     return modifierStateGetter;
   }
@@ -9141,6 +9170,7 @@
   registerEvents$3();
   registerEvents();
 
+  // 收集事件
   function extractEvents$5(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags, targetContainer) {
     // TODO: we should remove the concept of a "SimpleEventPlugin".
     // This is the basic functionality of the event system. All
@@ -9223,6 +9253,7 @@
     }
   }
 
+  // 处理事件
   function processDispatchQueue(dispatchQueue, eventSystemFlags) {
     var inCapturePhase = (eventSystemFlags & IS_CAPTURE_PHASE) !== 0;
 
@@ -9230,16 +9261,20 @@
       var _dispatchQueue$i = dispatchQueue[i],
         event = _dispatchQueue$i.event,
         listeners = _dispatchQueue$i.listeners;
-      processDispatchQueueItemsInOrder(event, listeners, inCapturePhase); //  event system doesn't use pooling.
-    } // This would be a good time to rethrow if any of the event handlers threw.
+      processDispatchQueueItemsInOrder(event, listeners, inCapturePhase); 
+      //  event system doesn't use pooling.
+      // 事件系统不使用池化
+    } 
 
-
+    // This would be a good time to rethrow if any of the event handlers threw.
     rethrowCaughtError();
   }
 
+  // 插件调度事件
   function dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
     var nativeEventTarget = getEventTarget(nativeEvent);
     var dispatchQueue = [];
+    // 收集事件
     extractEvents$5(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags);
     processDispatchQueue(dispatchQueue, eventSystemFlags);
   }
@@ -9260,6 +9295,7 @@
       listenerSet.add(listenerSetKey);
     }
   }
+
   function listenToNativeEvent(domEventName, isCapturePhaseListener, target) {
     {
       if (nonDelegatedEvents.has(domEventName) && !isCapturePhaseListener) {
@@ -9276,6 +9312,7 @@
     addTrappedEventListener(target, domEventName, eventSystemFlags, isCapturePhaseListener);
   }
 
+  // Math.random().toString(36).slice(2) 生成随机字符串的方法
   // This is only used by createEventHandle when the
   var listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
   function listenToAllSupportedEvents(rootContainerElement) {
@@ -9306,8 +9343,8 @@
   }
 
   function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener, isDeferredListenerForLegacyFBSupport) {
-    var listener = createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags); // If passive option is not supported, then the event will be
-    // active and not passive.
+    var listener = createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags); 
+    // If passive option is not supported, then the event will be active and not passive.
 
     var isPassiveListener = undefined;
 
@@ -9317,6 +9354,11 @@
       // to document anymore, but changing this now would undo
       // the performance wins from the change. So we emulate
       // the existing behavior manually on the roots now.
+
+      // 浏览器引入了干预，使得这些事件 document 默认是被动的。 
+      // React 不绑定它们不再记录，但现在更改它会撤消性能因改变而胜出。
+      // 所以我们效仿现在手动在根上执行现有行为。
+
       // https://github.com/facebook/react/issues/19651
       if (domEventName === 'touchstart' || domEventName === 'touchmove' || domEventName === 'wheel') {
         isPassiveListener = true;
@@ -9324,7 +9366,8 @@
     }
 
     targetContainer = targetContainer;
-    var unsubscribeListener; // When legacyFBSupport is enabled, it's for when we
+    var unsubscribeListener; 
+    // When legacyFBSupport is enabled, it's for when we
 
 
     if (isCapturePhaseListener) {
@@ -10110,6 +10153,7 @@
   }
 
   // Calculate the diff between the two objects.
+  // 
   function diffProperties(domElement, tag, lastRawProps, nextRawProps, rootContainerElement) {
     {
       validatePropertiesInDevelopment(tag, nextRawProps);
@@ -15380,6 +15424,7 @@
     }
 
     function updateTextNode(returnFiber, current, textContent, lanes) {
+      // current 不存在，直接创建，如果存在那就复用
       if (current === null || current.tag !== HostText) {
         // Insert
         var created = createFiberFromText(textContent, returnFiber.mode, lanes);
@@ -15420,7 +15465,8 @@
 
           return existing;
         }
-      } // Insert
+      }
+      // Insert
 
 
       // 否则创建节点
@@ -15525,15 +15571,21 @@
         // Text nodes don't have keys. If the previous node is implicitly keyed
         // we can continue to replace it without aborting even if it is not a text
         // node.
+
+        // Todo: 优化手段 
+        // 文本节点并没有键。如果前一个节点是隐式键控的
+        // 我们也可以继续替换它而不会中止节点，即使它不是文本
+
+        // 如果key 存在，就直接返回 null。
         if (key !== null) {
           return null;
         }
-
         return updateTextNode(returnFiber, oldFiber, '' + newChild, lanes);
       }
 
       // Q: 这里只判断了，newChild 是对象的这种情况，那么问题来了，可能是数组吗？
       // A: 下面有判断哦
+      // Todo: 核心思想，key 相同就复用，否则返回 null
       if (typeof newChild === 'object' && newChild !== null) {
         switch (newChild.$$typeof) {
           case REACT_ELEMENT_TYPE:
@@ -15562,14 +15614,18 @@
             }
         }
 
-        // 如果是数组的话
+        
+        // Todo: 如果子节点是数组的话
         if (isArray(newChild) || getIteratorFn(newChild)) {
           // oldFiber.key !== null，直接返回 null ？
           // Q: 怎么理解？
           if (key !== null) {
+            // 第一种情况：如果 oldFiber.key，直接返回null，这意味，在数组的子元素，
+            // 进行比较时，并不会再去比较子元素是否是数组，也就是说，不会跨层级比较
             return null;
           }
           // 不是的话，直接创建节点返回？
+          // 第二种情况：子元素是数组，但是key不存在，调用 updateFragment 更新返回
           return updateFragment(returnFiber, oldFiber, newChild, lanes, null);
         }
 
@@ -15589,6 +15645,8 @@
       if (typeof newChild === 'string' && newChild !== '' || typeof newChild === 'number') {
         // Text nodes don't have keys, so we neither have to check the old nor
         // new node for the key. If both are text nodes, they match.
+
+        // 文本节点没有键，因此我们不必检查旧的或键的新节点。如果两者都是文本节点，则它们匹配。
         var matchedFiber = existingChildren.get(newIdx) || null;
         return updateTextNode(returnFiber, matchedFiber, '' + newChild, lanes);
       }
@@ -15682,7 +15740,7 @@
     // start
     function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren, lanes) {
       debugger
-      // This algorithm can't optimize by searching from both ends since we
+      // This algorithm can't optimize by searching from both ends since(因为) we
       // don't have backpointers on fibers. I'm trying to see how far we can get
       // with that model. If it ends up not being worth the tradeoffs, we can
       // add it later.
@@ -15733,6 +15791,7 @@
 
       var lastPlacedIndex = 0;
       // 记录最后一个被“放置”的节点的索引。用于优化节点的移动操作，避免不必要的 DOM 操作。
+      // 我们的参照物是：最后一个可复用的节点在oldFiber中的位置索引（用变量lastPlacedIndex表示）
 
       var newIdx = 0;
       // 当前新节点的索引。用于遍历新节点列表。
@@ -15758,9 +15817,11 @@
           nextOldFiber = oldFiber.sibling;
         }
 
-        // Todo: do what ?
-        // 第一种情况：如果 key 相同，则复用节点
-        // 第二种情况：如果 key 相同 type 不同
+        // Todo: do what ? 待完善。
+        // 第一种情况：可以复用节点，如果 key 相同，type 相同的话。newFiber 即为更新之后的 fiber
+        // 第二种情况：看看子元素的类型，
+            // 如果 key 相同 type 不同，返回 null
+            // 如果 
         var newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx], lanes);
 
         if (newFiber === null) {
@@ -15790,6 +15851,8 @@
 
         // Tip: 最后一个可复用的节点索引
         // 最后一个可复用的节点在 oldFiber 中的位置索引
+        // lastPlacedIndex，保证上次可以复用节点的次序
+
         lastPlacedIndex = placeChild(newFiber, lastPlacedIndex, newIdx);
 
         if (previousNewFiber === null) {
@@ -15871,11 +15934,16 @@
 
         if (_newFiber2 !== null) {
           if (shouldTrackSideEffects) {
+
             if (_newFiber2.alternate !== null) {
               // The new fiber is a work in progress, but if there exists a
               // current, that means that we reused the fiber. We need to delete
               // it from the child list so that we don't add it to the deletion
               // list.
+
+              // 新的 Fiber 正在进行中，但是如果存在目前，这意味着我们重复使用了 fiber。
+              // 我们需要删除将其从子列表中删除，这样我们就不会将其添加到删除中列表。（优化性能）
+
               existingChildren.delete(_newFiber2.key === null ? newIdx : _newFiber2.key);
             }
           }
@@ -27573,6 +27641,7 @@
   // exiting a task.
 
   // 接下来通知 Scheduler 根据更新的优先级，决定以同步还是异步的方式调度本次更新
+  // Todo: 高优先级打断低优先级问题（待深入）
   function ensureRootIsScheduled(root, currentTime) {
     // debugger
     var existingCallbackNode = root.callbackNode;
