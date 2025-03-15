@@ -155,6 +155,7 @@
 
   var enableProfilerNestedUpdatePhase = true; // Adds verbose console logging for e.g. state updates, suspense, and work loop
 
+  // 将所有的原生事件map这里
   var allNativeEvents = new Set();
   /**
    * Mapping from registration name to event name
@@ -162,6 +163,7 @@
 
 
   var registrationNameDependencies = {};
+  // 将小写注册名称映射到正确大小写的版本，用于在缺少事件处理程序的情况下发出警告。仅在 true 中可用
   /**
    * Mapping from lowercase registration names to the properly cased version,
    * used to warn in the case of missing event handlers. Available
@@ -169,21 +171,24 @@
    * @type {Object}
    */
 
-  var possibleRegistrationNames = {}; // Trust the developer to only use possibleRegistrationNames in true
+  var possibleRegistrationNames = {}; 
+  // Trust the developer to only use possibleRegistrationNames in true
+  // 相信开发人员只在 true 中使用 possibleRegistrationNames
 
+  // 捕获和冒泡
   function registerTwoPhaseEvent(registrationName, dependencies) {
     registerDirectEvent(registrationName, dependencies);
     registerDirectEvent(registrationName + 'Capture', dependencies);
   }
+
+  //  registrationName 是合成事件名，比如 
   function registerDirectEvent(registrationName, dependencies) {
     {
       if (registrationNameDependencies[registrationName]) {
         error('EventRegistry: More than one plugin attempted to publish the same ' + 'registration name, `%s`.', registrationName);
       }
     }
-
     registrationNameDependencies[registrationName] = dependencies;
-
     {
       var lowerCasedName = registrationName.toLowerCase();
       possibleRegistrationNames[lowerCasedName] = registrationName;
@@ -196,6 +201,7 @@
     for (var i = 0; i < dependencies.length; i++) {
       allNativeEvents.add(dependencies[i]);
     }
+
   }
 
   var canUseDOM = !!(typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined');
@@ -7524,11 +7530,23 @@
   var SPACEBAR_CHAR = String.fromCharCode(SPACEBAR_CODE);
 
   function registerEvents() {
+    debugger
+    // const input = document.querySelector("input");
+    // const log = document.getElementById("values");
+    // input.addEventListener("beforeinput", updateValue);
+    // function updateValue(e) {
+    //   log.textContent = e.target.value;
+    // }
+    // onBeforeInput 是 react，抽象的一种事件名称， beforeinput 事件
+    // 后面几种事件都会触发 onBeforeInput 事件
     registerTwoPhaseEvent('onBeforeInput', ['compositionend', 'keypress', 'textInput', 'paste']);
+
     registerTwoPhaseEvent('onCompositionEnd', ['compositionend', 'focusout', 'keydown', 'keypress', 'keyup', 'mousedown']);
     registerTwoPhaseEvent('onCompositionStart', ['compositionstart', 'focusout', 'keydown', 'keypress', 'keyup', 'mousedown']);
     registerTwoPhaseEvent('onCompositionUpdate', ['compositionupdate', 'focusout', 'keydown', 'keypress', 'keyup', 'mousedown']);
-  } // Track whether we've ever handled a keypress on the space key.
+
+  }
+  // Track whether we've ever handled a keypress on the space key.
 
 
   var hasSpaceKeypress = false;
@@ -8172,6 +8190,7 @@
     }
   }
 
+  
   function registerEvents$2() {
     registerDirectEvent('onMouseEnter', ['mouseout', 'mouseover']);
     registerDirectEvent('onMouseLeave', ['mouseout', 'mouseover']);
@@ -8983,7 +9002,8 @@
   var ANIMATION_START = getVendorPrefixedEventName('animationstart');
   var TRANSITION_END = getVendorPrefixedEventName('transitionend');
 
-  var topLevelEventsToReactNames = new Map(); // NOTE: Capitalization is important in this list!
+  var topLevelEventsToReactNames = new Map(); 
+  // NOTE: Capitalization is important in this list!
   //
   // E.g. it needs "pointerDown", not "pointerdown".
   // This is because we derive both React name ("onPointerDown")
@@ -8995,19 +9015,23 @@
 
   var simpleEventPluginEvents = ['abort', 'auxClick', 'cancel', 'canPlay', 'canPlayThrough', 'click', 'close', 'contextMenu', 'copy', 'cut', 'drag', 'dragEnd', 'dragEnter', 'dragExit', 'dragLeave', 'dragOver', 'dragStart', 'drop', 'durationChange', 'emptied', 'encrypted', 'ended', 'error', 'gotPointerCapture', 'input', 'invalid', 'keyDown', 'keyPress', 'keyUp', 'load', 'loadedData', 'loadedMetadata', 'loadStart', 'lostPointerCapture', 'mouseDown', 'mouseMove', 'mouseOut', 'mouseOver', 'mouseUp', 'paste', 'pause', 'play', 'playing', 'pointerCancel', 'pointerDown', 'pointerMove', 'pointerOut', 'pointerOver', 'pointerUp', 'progress', 'rateChange', 'reset', 'resize', 'seeked', 'seeking', 'stalled', 'submit', 'suspend', 'timeUpdate', 'touchCancel', 'touchEnd', 'touchStart', 'volumeChange', 'scroll', 'toggle', 'touchMove', 'waiting', 'wheel'];
 
+  // 一对一事件，即一个 react 事件 对应一个原生事件。
   function registerSimpleEvent(domEventName, reactName) {
     topLevelEventsToReactNames.set(domEventName, reactName);
     registerTwoPhaseEvent(reactName, [domEventName]);
   }
 
+  // Tip: 
   function registerSimpleEvents() {
+    debugger
     for (var i = 0; i < simpleEventPluginEvents.length; i++) {
       var eventName = simpleEventPluginEvents[i];
       var domEventName = eventName.toLowerCase();
+      // 大写事件
       var capitalizedEvent = eventName[0].toUpperCase() + eventName.slice(1);
       registerSimpleEvent(domEventName, 'on' + capitalizedEvent);
-    } // Special cases where event names don't match.
-
+    }
+    // Special cases where event names don't match.
 
     registerSimpleEvent(ANIMATION_END, 'onAnimationEnd');
     registerSimpleEvent(ANIMATION_ITERATION, 'onAnimationIteration');
@@ -9164,11 +9188,14 @@
   }
 
   // TODO: remove top-level side effect.
-  registerSimpleEvents();
-  registerEvents$2();
-  registerEvents$1();
-  registerEvents$3();
-  registerEvents();
+  registerSimpleEvents(); // 
+
+  registerEvents$2(); // onMouseEnter，onMouseLeave，onPointerEnter，onPointerLeave
+  registerEvents$1(); // onChange
+  registerEvents$3(); // onSelect
+  registerEvents();   // onBeforeInput，onCompositionEnd，onCompositionStart，onCompositionUpdate
+  // Todo: 做了哪些事情？
+
 
   // 收集事件
   function extractEvents$5(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags, targetContainer) {
@@ -9210,6 +9237,7 @@
   // set them on the actual target element itself. This is primarily
   // because these events do not consistently bubble in the DOM.
 
+  // 非委托事件
   var nonDelegatedEvents = new Set(['cancel', 'close', 'invalid', 'load', 'scroll', 'toggle'].concat(mediaEventTypes));
 
   function executeDispatch(event, listener, currentTarget) {
@@ -9296,6 +9324,7 @@
     }
   }
 
+  // Tip: 
   function listenToNativeEvent(domEventName, isCapturePhaseListener, target) {
     {
       if (nonDelegatedEvents.has(domEventName) && !isCapturePhaseListener) {
@@ -9315,12 +9344,17 @@
   // Math.random().toString(36).slice(2) 生成随机字符串的方法
   // This is only used by createEventHandle when the
   var listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
+  // 
   function listenToAllSupportedEvents(rootContainerElement) {
     if (!rootContainerElement[listeningMarker]) {
+      // 标记
       rootContainerElement[listeningMarker] = true;
+
       allNativeEvents.forEach(function (domEventName) {
         // We handle selectionchange separately because it
         // doesn't bubble and needs to be on the document.
+        // 我们单独处理选择变化，因为它不会冒泡，并且需要在文档上。
+
         if (domEventName !== 'selectionchange') {
           if (!nonDelegatedEvents.has(domEventName)) {
             listenToNativeEvent(domEventName, false, rootContainerElement);
@@ -31688,7 +31722,7 @@
     }
   };
 
-  // Tip: 
+  // Tip: 初始化
   function createRoot(container, options) {
     // debugger
     if (!isValidContainer(container)) {
@@ -31734,6 +31768,8 @@
     var root = createContainer(container, ConcurrentRoot, null, isStrictMode, concurrentUpdatesByDefaultOverride, identifierPrefix, onRecoverableError);
     markContainerAsRoot(root.current, container);
     var rootContainerElement = container.nodeType === COMMENT_NODE ? container.parentNode : container;
+
+    // Tip: 注册可以支持通过事件委托出发的事件
     listenToAllSupportedEvents(rootContainerElement);
     return new ReactDOMRoot(root);
   }

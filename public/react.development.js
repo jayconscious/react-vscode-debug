@@ -1987,7 +1987,8 @@
       }
 
       Error.prepareStackTrace = previousPrepareStackTrace;
-    } // Fallback to just using the name if we couldn't make it throw.
+    }
+    // Fallback to just using the name if we couldn't make it throw.
 
 
     var name = fn ? fn.displayName || fn.name : '';
