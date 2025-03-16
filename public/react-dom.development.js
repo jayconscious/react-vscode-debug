@@ -171,7 +171,7 @@
    * @type {Object}
    */
 
-  var possibleRegistrationNames = {}; 
+  var possibleRegistrationNames = {};
   // Trust the developer to only use possibleRegistrationNames in true
   // 相信开发人员只在 true 中使用 possibleRegistrationNames
 
@@ -4061,10 +4061,13 @@
     }
   }
 
+  // Todo: 
   function batchedUpdates(fn, a, b) {
     if (isInsideEventHandler) {
       // If we are currently inside another batch, we need to wait until it
       // fully completes before restoring state.
+
+      // 如果我们当前位于另一个批次内，则需要等到它完全完成后才能恢复状态。
       return fn(a, b);
     }
 
@@ -4142,12 +4145,12 @@
     return listener;
   }
 
-  var passiveBrowserEventsSupported = false; 
+  var passiveBrowserEventsSupported = false;
   // Check if browser support events with passive listeners
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Safely_detecting_option_support
   if (canUseDOM) {
     try {
-      var options = {}; 
+      var options = {};
       // $FlowFixMe: Ignore Flow complaining about needing a value
 
       Object.defineProperty(options, 'passive', {
@@ -4249,7 +4252,8 @@
           restoreAfterDispatch();
           func.apply(context, funcArgs);
           didError = false;
-        } // Create a global error event handler. We use this to capture the value
+        } 
+        // Create a global error event handler. We use this to capture the value
         // that was thrown. It's possible that this error handler will fire more
         // than once; for example, if non-React code also calls `dispatchEvent`
         // and a handler for that event throws. We should be resilient to most of
@@ -4330,6 +4334,7 @@
     }
   }
 
+  // Tip: invokeGuardedCallbackImpl
   var invokeGuardedCallbackImpl$1 = invokeGuardedCallbackImpl;
 
   var hasError = false;
@@ -6552,7 +6557,11 @@
   function isEnabled() {
     return _enabled;
   }
+
+  // 事件监听的回调函数
   function createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags) {
+    debugger
+
     var eventPriority = getEventPriority(domEventName);
     var listenerWrapper;
 
@@ -6571,6 +6580,7 @@
         break;
     }
 
+    // 事件绑定在这里
     return listenerWrapper.bind(null, domEventName, eventSystemFlags, targetContainer);
   }
 
@@ -6612,7 +6622,19 @@
     }
   }
 
+  // Todo: 
+  // 函数的作用
+  // dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay 的主要作用是在 React 的事件系统中分发事件，并处理以下逻辑：
+
+  // 事件捕获阶段：
+  // 支持事件捕获阶段的处理。
+  // 选择性注水（Selective Hydration）：
+  // 在并发模式下，React 可能会选择性地对某些组件进行注水（hydration），即恢复组件的交互状态。
+  // 避免离散事件重放（Without Discrete Event Replay）：
+  // 避免对离散事件（如点击、输入等）进行重放，确保事件处理的正确性和性能。
+
   function dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
+    // debugger 
     var blockedOn = findInstanceBlockingEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent);
 
     if (blockedOn === null) {
@@ -6656,7 +6678,8 @@
       }
 
       return;
-    } // This is not replayable so we'll invoke it but without a target,
+    }
+    // This is not replayable so we'll invoke it but without a target,
     // in case the event system needs to trace it.
 
 
@@ -7312,12 +7335,12 @@
       if (key !== 'Unidentified') {
         return key;
       }
-    } 
+    }
     // Browser does not implement `key`, polyfill as much of it as we can.
 
 
     if (nativeEvent.type === 'keypress') {
-      var charCode = getEventCharCode(nativeEvent); 
+      var charCode = getEventCharCode(nativeEvent);
       // The enter-key is technically both printable and non-printable and can
       // thus be captured by `keypress`, no other non-printable key should.
 
@@ -7344,8 +7367,8 @@
     Control: 'ctrlKey',
     Meta: 'metaKey',
     Shift: 'shiftKey'
-  }; 
-  
+  };
+
   // Older browsers (Safari <= 10, iOS Safari <= 10.2) do not support
   // getModifierState. If getModifierState is not supported, we map it to a set of
   // modifier keys exposed by the event. In this case, Lock-keys are not supported.
@@ -8190,7 +8213,7 @@
     }
   }
 
-  
+
   function registerEvents$2() {
     registerDirectEvent('onMouseEnter', ['mouseout', 'mouseover']);
     registerDirectEvent('onMouseLeave', ['mouseout', 'mouseover']);
@@ -9002,7 +9025,7 @@
   var ANIMATION_START = getVendorPrefixedEventName('animationstart');
   var TRANSITION_END = getVendorPrefixedEventName('transitionend');
 
-  var topLevelEventsToReactNames = new Map(); 
+  var topLevelEventsToReactNames = new Map();
   // NOTE: Capitalization is important in this list!
   //
   // E.g. it needs "pointerDown", not "pointerdown".
@@ -9206,7 +9229,9 @@
     // be core the to event system. This would potentially allow
     // us to ship builds of React without the polyfilled plugins below.
     extractEvents$4(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags);
-    var shouldProcessPolyfillPlugins = (eventSystemFlags & SHOULD_NOT_PROCESS_POLYFILL_EVENT_PLUGINS) === 0; // We don't process these events unless we are in the
+    var shouldProcessPolyfillPlugins = (eventSystemFlags & SHOULD_NOT_PROCESS_POLYFILL_EVENT_PLUGINS) === 0;
+
+    // We don't process these events unless we are in the
     // event's native "bubble" phase, which means that we're
     // not in the capture phase. That's because we emulate
     // the capture phase here still. This is a trade-off,
@@ -9230,7 +9255,8 @@
       extractEvents$3(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget);
       extractEvents(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget);
     }
-  } // List of events that need to be individually attached to media elements.
+  }
+  // List of events that need to be individually attached to media elements.
 
 
   var mediaEventTypes = ['abort', 'canplay', 'canplaythrough', 'durationchange', 'emptied', 'encrypted', 'ended', 'error', 'loadeddata', 'loadedmetadata', 'loadstart', 'pause', 'play', 'playing', 'progress', 'ratechange', 'resize', 'seeked', 'seeking', 'stalled', 'suspend', 'timeupdate', 'volumechange', 'waiting']; // We should not delegate these events to the container, but rather
@@ -9289,10 +9315,10 @@
       var _dispatchQueue$i = dispatchQueue[i],
         event = _dispatchQueue$i.event,
         listeners = _dispatchQueue$i.listeners;
-      processDispatchQueueItemsInOrder(event, listeners, inCapturePhase); 
+      processDispatchQueueItemsInOrder(event, listeners, inCapturePhase);
       //  event system doesn't use pooling.
       // 事件系统不使用池化
-    } 
+    }
 
     // This would be a good time to rethrow if any of the event handlers threw.
     rethrowCaughtError();
@@ -9324,7 +9350,7 @@
     }
   }
 
-  // Tip: 
+  // Tip: 添加原生事件监听器
   function listenToNativeEvent(domEventName, isCapturePhaseListener, target) {
     {
       if (nonDelegatedEvents.has(domEventName) && !isCapturePhaseListener) {
@@ -9377,7 +9403,9 @@
   }
 
   function addTrappedEventListener(targetContainer, domEventName, eventSystemFlags, isCapturePhaseListener, isDeferredListenerForLegacyFBSupport) {
-    var listener = createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags); 
+
+    var listener = createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags);
+
     // If passive option is not supported, then the event will be active and not passive.
 
     var isPassiveListener = undefined;
@@ -9400,8 +9428,9 @@
     }
 
     targetContainer = targetContainer;
-    var unsubscribeListener; 
+    var unsubscribeListener;
     // When legacyFBSupport is enabled, it's for when we
+    // 当 legacyFBSupport 启用时，它用于我们
 
 
     if (isCapturePhaseListener) {
@@ -15648,7 +15677,7 @@
             }
         }
 
-        
+
         // Todo: 如果子节点是数组的话
         if (isArray(newChild) || getIteratorFn(newChild)) {
           // oldFiber.key !== null，直接返回 null ？
@@ -15829,7 +15858,7 @@
 
       var newIdx = 0;
       // 当前新节点的索引。用于遍历新节点列表。
-      
+
       var nextOldFiber = null;
 
       // oldFiber 存在，遍历 react element ast
@@ -15854,8 +15883,8 @@
         // Todo: do what ? 待完善。
         // 第一种情况：可以复用节点，如果 key 相同，type 相同的话。newFiber 即为更新之后的 fiber
         // 第二种情况：看看子元素的类型，
-            // 如果 key 相同 type 不同，返回 null
-            // 如果 
+        // 如果 key 相同 type 不同，返回 null
+        // 如果 
         var newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIdx], lanes);
 
         if (newFiber === null) {
@@ -15951,7 +15980,7 @@
         }
 
         return resultingFirstChild;
-      } 
+      }
 
 
       // Add the remaining children to a key map for quick lookups.
@@ -25931,7 +25960,7 @@
             } catch (error) {
               captureCommitPhaseError(finishedWork, finishedWork.return, error);
             }
-            
+
             // Layout effects are destroyed during the mutation phase so that all
             // destroy functions for all fibers are called before any create functions.
             // This prevents sibling component effects from interfering with each other,

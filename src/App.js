@@ -7,6 +7,7 @@ export default function App() {
   const [disabled, setDisabled] = useState(true)
 
   const sendCode = () => {
+    debugger
     console.log('sendCode 111')
   }
 
