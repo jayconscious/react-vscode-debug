@@ -3952,7 +3952,7 @@
    */
 
   //  nativeEvent 原生事件 引用
-  //  Todo: 待深入
+  //  Todo: 返回触发事件的具体元素
   function getEventTarget(nativeEvent) {
     // Fallback to nativeEvent.srcElement for IE9
     // https://github.com/facebook/react/issues/12506
@@ -4296,7 +4296,8 @@
         var evtType = "react-" + (name ? name : 'invokeguardedcallback'); // Attach our event handlers
 
         window.addEventListener('error', handleWindowError);
-        fakeNode.addEventListener(evtType, callCallback, false); // Synchronously dispatch our fake event. If the user-provided function
+        fakeNode.addEventListener(evtType, callCallback, false); 
+        // Synchronously dispatch our fake event. If the user-provided function
         // errors, it will trigger our global error handler.
 
         evt.initEvent(evtType, false, false);
@@ -4338,7 +4339,8 @@
   var invokeGuardedCallbackImpl$1 = invokeGuardedCallbackImpl;
 
   var hasError = false;
-  var caughtError = null; // Used by event system to capture/rethrow the first error.
+  var caughtError = null; 
+  // Used by event system to capture/rethrow the first error.
 
   var hasRethrowError = false;
   var rethrowError = null;
@@ -6548,8 +6550,10 @@
 
   var ReactCurrentBatchConfig = ReactSharedInternals.ReactCurrentBatchConfig; // TODO: can we stop exporting these?
 
-  var _enabled = true; // This is exported in FB builds for use by legacy FB layer infra.
+  var _enabled = true; 
+  // This is exported in FB builds for use by legacy FB layer infra.
   // We'd like to remove this but it's not clear if this is safe.
+  // 这在 FB 构建中导出，以供旧版 FB 层基础设施使用。我们想删除它，但不清楚这是否安全。
 
   function setEnabled(enabled) {
     _enabled = !!enabled;
@@ -6613,6 +6617,7 @@
   }
 
   function dispatchEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
+    // 
     if (!_enabled) {
       return;
     }
@@ -6634,7 +6639,7 @@
   // 避免对离散事件（如点击、输入等）进行重放，确保事件处理的正确性和性能。
 
   function dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
-    // debugger 
+    debugger
     var blockedOn = findInstanceBlockingEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent);
 
     if (blockedOn === null) {
@@ -6646,7 +6651,9 @@
     if (queueIfContinuousEvent(blockedOn, domEventName, eventSystemFlags, targetContainer, nativeEvent)) {
       nativeEvent.stopPropagation();
       return;
-    } // We need to clear only if we didn't queue because
+    }
+
+    // We need to clear only if we didn't queue because
     // queueing is accumulative.
 
 
@@ -6739,7 +6746,8 @@
       }
     }
 
-    return_targetInst = targetInst; // We're not blocked on anything.
+    return_targetInst = targetInst; 
+    // We're not blocked on anything.
 
     return null;
   }
@@ -9196,12 +9204,14 @@
         // This is a breaking change that can wait until React 18.
         domEventName === 'scroll';
 
+        // 收集具体元素上绑定的事件
       var _listeners = accumulateSinglePhaseListeners(targetInst, reactName, nativeEvent.type, inCapturePhase, accumulateTargetOnly);
 
       if (_listeners.length > 0) {
         // Intentionally create event lazily.
         var _event = new SyntheticEventCtor(reactName, reactEventType, null, nativeEvent, nativeEventTarget);
 
+        // 维护到队列里面
         dispatchQueue.push({
           event: _event,
           listeners: _listeners
@@ -9229,6 +9239,7 @@
     // be core the to event system. This would potentially allow
     // us to ship builds of React without the polyfilled plugins below.
     extractEvents$4(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags);
+
     var shouldProcessPolyfillPlugins = (eventSystemFlags & SHOULD_NOT_PROCESS_POLYFILL_EVENT_PLUGINS) === 0;
 
     // We don't process these events unless we are in the
@@ -9259,7 +9270,8 @@
   // List of events that need to be individually attached to media elements.
 
 
-  var mediaEventTypes = ['abort', 'canplay', 'canplaythrough', 'durationchange', 'emptied', 'encrypted', 'ended', 'error', 'loadeddata', 'loadedmetadata', 'loadstart', 'pause', 'play', 'playing', 'progress', 'ratechange', 'resize', 'seeked', 'seeking', 'stalled', 'suspend', 'timeupdate', 'volumechange', 'waiting']; // We should not delegate these events to the container, but rather
+  var mediaEventTypes = ['abort', 'canplay', 'canplaythrough', 'durationchange', 'emptied', 'encrypted', 'ended', 'error', 'loadeddata', 'loadedmetadata', 'loadstart', 'pause', 'play', 'playing', 'progress', 'ratechange', 'resize', 'seeked', 'seeking', 'stalled', 'suspend', 'timeupdate', 'volumechange', 'waiting'];
+  // We should not delegate these events to the container, but rather
   // set them on the actual target element itself. This is primarily
   // because these events do not consistently bubble in the DOM.
 
@@ -9273,9 +9285,11 @@
     event.currentTarget = null;
   }
 
+  // Tip:  按序处理事件
   function processDispatchQueueItemsInOrder(event, dispatchListeners, inCapturePhase) {
     var previousInstance;
 
+    // 捕获阶段，降序
     if (inCapturePhase) {
       for (var i = dispatchListeners.length - 1; i >= 0; i--) {
         var _dispatchListeners$i = dispatchListeners[i],
@@ -9291,6 +9305,7 @@
         previousInstance = instance;
       }
     } else {
+      // 冒泡阶段，升序
       for (var _i = 0; _i < dispatchListeners.length; _i++) {
         var _dispatchListeners$_i = dispatchListeners[_i],
           _instance = _dispatchListeners$_i.instance,
@@ -9330,6 +9345,7 @@
     var dispatchQueue = [];
     // 收集事件
     extractEvents$5(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags);
+    // 处理事件
     processDispatchQueue(dispatchQueue, eventSystemFlags);
   }
 
@@ -9539,6 +9555,7 @@
       }
     }
 
+    // 等待渲染完成之后
     batchedUpdates(function () {
       return dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, ancestorInst);
     });
@@ -9552,6 +9569,7 @@
     };
   }
 
+  // Tip: 收集具体元素上绑定的事件
   function accumulateSinglePhaseListeners(targetFiber, reactName, nativeEventType, inCapturePhase, accumulateTargetOnly, nativeEvent) {
     var captureName = reactName !== null ? reactName + 'Capture' : null;
     var reactEventName = inCapturePhase ? captureName : reactName;
@@ -9584,11 +9602,13 @@
         break;
       } // If we are processing the onBeforeBlur event, then we need to take
 
+      // 返回父节点
       instance = instance.return;
     }
 
     return listeners;
-  } // We should only use this function for:
+  } 
+  // We should only use this function for:
   // - BeforeInputEventPlugin
   // - ChangeEventPlugin
   // - SelectEventPlugin
@@ -10445,6 +10465,7 @@
     }
   }
 
+  // Tip: diffHydratedProperties
   function diffHydratedProperties(domElement, tag, rawProps, parentNamespace, rootContainerElement, isConcurrentMode, shouldWarnDev) {
     var isCustomComponentTag;
     var extraAttributeNames;
@@ -11773,6 +11794,7 @@
   var internalEventHandlersKey = '__reactEvents$' + randomKey;
   var internalEventHandlerListenersKey = '__reactListeners$' + randomKey;
   var internalEventHandlesSetKey = '__reactHandles$' + randomKey;
+
   function detachDeletedInstance(node) {
     // TODO: This function is only called on host components. I don't think all of
     // these fields are relevant.
@@ -11807,7 +11829,8 @@
     if (targetInst) {
       // Don't return HostRoot or SuspenseComponent here.
       return targetInst;
-    } // If the direct event target isn't a React owned DOM node, we need to look
+    } 
+    // If the direct event target isn't a React owned DOM node, we need to look
     // to see if one of its parents is a React owned DOM node.
 
 
@@ -28233,7 +28256,7 @@
   // through Scheduler
 
 
-  // Tip: render阶段的起始，同步
+  // Tip: render 阶段的起始，同步
   function performSyncWorkOnRoot(root) {
     {
       syncNestedUpdateFlag();
@@ -28305,8 +28328,8 @@
     }
   }
 
-  // React Hooks有batchedUpdates，当在click中触发三次updateNum，
-  // 精简React会触发三次更新，而React只会触发一次。
+  // React Hooks 有 batchedUpdates，当在 click 中触发三次 updateNum，
+  // 精简 React 会触发三次更新，而 React 只会触发一次。
   // 如何合并 update ？
   function batchedUpdates$1(fn, a) {
     var prevExecutionContext = executionContext;
@@ -28315,7 +28338,8 @@
     try {
       return fn(a);
     } finally {
-      executionContext = prevExecutionContext; // If there were legacy sync updates, flush them at the end of the outer
+      executionContext = prevExecutionContext; 
+      // If there were legacy sync updates, flush them at the end of the outer
       // most batchedUpdates-like method.
 
       if (executionContext === NoContext && // Treat `act` as if it's inside `batchedUpdates`, even in legacy mode.
@@ -32188,6 +32212,7 @@
     }
   }
 
+  // 设置钩子函数
   setRestoreImplementation(restoreControlledState$3);
   setBatchingImplementation(batchedUpdates$1, discreteUpdates, flushSync);
 
