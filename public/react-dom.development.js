@@ -4187,6 +4187,15 @@
     // takes the extra step of enabling pause on caught exceptions. This is
     // unintuitive, though, because even though React has caught the error, from
     // the developer's perspective, the error is uncaught.
+
+    // 在 DEV 模式下，我们将invokeGuardedCallback 替换为一个特殊版本
+    // ，该版本可以更好地与浏览器的 DevTools 配合使用。这样做的目的是保留
+    // “发生异常时暂停”的行为。由于 React 将所有用户提供的
+    // 函数包装在invokeGuardedCallback 中，并且生产版本的
+    // invokeGuardedCallback 使用 try-catch，因此所有用户异常都被视为
+    // 捕获的异常，并且除非开发人员
+    // 采取额外步骤启用捕获异常时的暂停，否则 DevTools 不会暂停。但是，这是不直观的，因为即使 React 捕获了错误，从
+    // 开发人员的角度来看，错误仍未被捕获。
     //
     // To preserve the expected "Pause on exceptions" behavior, we don't use a
     // try-catch in DEV. Instead, we synchronously dispatch a fake event to a fake
@@ -4252,7 +4261,7 @@
           restoreAfterDispatch();
           func.apply(context, funcArgs);
           didError = false;
-        } 
+        }
         // Create a global error event handler. We use this to capture the value
         // that was thrown. It's possible that this error handler will fire more
         // than once; for example, if non-React code also calls `dispatchEvent`
@@ -4296,7 +4305,7 @@
         var evtType = "react-" + (name ? name : 'invokeguardedcallback'); // Attach our event handlers
 
         window.addEventListener('error', handleWindowError);
-        fakeNode.addEventListener(evtType, callCallback, false); 
+        fakeNode.addEventListener(evtType, callCallback, false);
         // Synchronously dispatch our fake event. If the user-provided function
         // errors, it will trigger our global error handler.
 
@@ -4339,7 +4348,7 @@
   var invokeGuardedCallbackImpl$1 = invokeGuardedCallbackImpl;
 
   var hasError = false;
-  var caughtError = null; 
+  var caughtError = null;
   // Used by event system to capture/rethrow the first error.
 
   var hasRethrowError = false;
@@ -5854,15 +5863,18 @@
   function isSubsetOfLanes(set, subset) {
     return (set & subset) === subset;
   }
+  // 合并 lanes
   function mergeLanes(a, b) {
     return a | b;
   }
+  // 分离 lanes
   function removeLanes(set, subset) {
     return set & ~subset;
   }
   function intersectLanes(a, b) {
     return a & b;
-  } // Seems redundant, but it changes the type from a single lane (used for
+  } 
+  // Seems redundant, but it changes the type from a single lane (used for
   // updates) to a group of lanes (used for flushing work).
 
   function laneToLanes(lane) {
@@ -6550,7 +6562,7 @@
 
   var ReactCurrentBatchConfig = ReactSharedInternals.ReactCurrentBatchConfig; // TODO: can we stop exporting these?
 
-  var _enabled = true; 
+  var _enabled = true;
   // This is exported in FB builds for use by legacy FB layer infra.
   // We'd like to remove this but it's not clear if this is safe.
   // 这在 FB 构建中导出，以供旧版 FB 层基础设施使用。我们想删除它，但不清楚这是否安全。
@@ -6564,7 +6576,7 @@
 
   // 事件监听的回调函数
   function createEventListenerWrapperWithPriority(targetContainer, domEventName, eventSystemFlags) {
-    debugger
+    // debugger
 
     var eventPriority = getEventPriority(domEventName);
     var listenerWrapper;
@@ -6639,7 +6651,7 @@
   // 避免对离散事件（如点击、输入等）进行重放，确保事件处理的正确性和性能。
 
   function dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay(domEventName, eventSystemFlags, targetContainer, nativeEvent) {
-    debugger
+    // debugger
     var blockedOn = findInstanceBlockingEvent(domEventName, eventSystemFlags, targetContainer, nativeEvent);
 
     if (blockedOn === null) {
@@ -6720,7 +6732,8 @@
             // TODO: If this is the first discrete event in the queue. Schedule an increased
             // priority for this boundary.
             return instance;
-          } // This shouldn't happen, something went wrong but to avoid blocking
+          }
+          // This shouldn't happen, something went wrong but to avoid blocking
           // the whole system, dispatch the event without a target.
           // TODO: Warn.
 
@@ -6746,7 +6759,7 @@
       }
     }
 
-    return_targetInst = targetInst; 
+    return_targetInst = targetInst;
     // We're not blocked on anything.
 
     return null;
@@ -6788,7 +6801,8 @@
       case 'touchcancel':
       case 'touchend':
       case 'touchstart':
-      case 'volumechange': // Used by polyfills:
+      case 'volumechange':
+      // Used by polyfills:
       // eslint-disable-next-line no-fallthrough
 
       case 'change':
@@ -6796,11 +6810,13 @@
       case 'textInput':
       case 'compositionstart':
       case 'compositionend':
-      case 'compositionupdate': // Only enableCreateEventHandleAPI:
+      case 'compositionupdate':
+      // Only enableCreateEventHandleAPI:
       // eslint-disable-next-line no-fallthrough
 
       case 'beforeblur':
-      case 'afterblur': // Not used by React but could be by user code:
+      case 'afterblur':
+      // Not used by React but could be by user code:
       // eslint-disable-next-line no-fallthrough
 
       case 'beforeinput':
@@ -6827,7 +6843,8 @@
       case 'scroll':
       case 'toggle':
       case 'touchmove':
-      case 'wheel': // Not used by React but could be by user code:
+      case 'wheel':
+      // Not used by React but could be by user code:
       // eslint-disable-next-line no-fallthrough
 
       case 'mouseenter':
@@ -7561,7 +7578,7 @@
   var SPACEBAR_CHAR = String.fromCharCode(SPACEBAR_CODE);
 
   function registerEvents() {
-    debugger
+    // debugger
     // const input = document.querySelector("input");
     // const log = document.getElementById("values");
     // input.addEventListener("beforeinput", updateValue);
@@ -9054,7 +9071,7 @@
 
   // Tip: 
   function registerSimpleEvents() {
-    debugger
+    // debugger
     for (var i = 0; i < simpleEventPluginEvents.length; i++) {
       var eventName = simpleEventPluginEvents[i];
       var domEventName = eventName.toLowerCase();
@@ -9080,6 +9097,7 @@
       return;
     }
 
+    // 合成事件对象
     var SyntheticEventCtor = SyntheticEvent;
     var reactEventType = domEventName;
 
@@ -9204,7 +9222,7 @@
         // This is a breaking change that can wait until React 18.
         domEventName === 'scroll';
 
-        // 收集具体元素上绑定的事件
+      // 收集具体元素上绑定的事件
       var _listeners = accumulateSinglePhaseListeners(targetInst, reactName, nativeEvent.type, inCapturePhase, accumulateTargetOnly);
 
       if (_listeners.length > 0) {
@@ -9334,7 +9352,6 @@
       //  event system doesn't use pooling.
       // 事件系统不使用池化
     }
-
     // This would be a good time to rethrow if any of the event handlers threw.
     rethrowCaughtError();
   }
@@ -9469,6 +9486,7 @@
   }
 
   function dispatchEventForPluginEventSystem(domEventName, eventSystemFlags, nativeEvent, targetInst, targetContainer) {
+    // 祖先实例，为什么需要这个东西？
     var ancestorInst = targetInst;
 
     if ((eventSystemFlags & IS_EVENT_HANDLE_NON_MANAGED_NODE) === 0 && (eventSystemFlags & IS_NON_DELEGATED) === 0) {
@@ -9486,6 +9504,14 @@
         // root boundaries that match that of our current "rootContainer".
         // If we find that "rootContainer", we find the parent fiber
         // sub-tree for that root and make that our ancestor instance.
+
+        // 下面的逻辑试图解决我们是否需要将目标光纤更改为不同的祖先。
+        // 我们在旧式事件系统中有类似的逻辑，但两者之间的巨大差异在于，
+        // 现代事件系统现在有一个事件监听器，它附加到每个 React Root 和 React Portal Root。
+        // 总之，代表这些根的 DOM 节点就是“rootContainer”。
+        // 为了确定我们应该使用哪个祖先实例，我们从目标实例向上遍历光纤树，并尝试找到与当前“rootContainer”匹配的根边界。
+        // 如果我们找到那个“rootContainer”，我们就会找到该根的父光纤子树，并将其作为我们的祖先
+
         var node = targetInst;
 
         mainLoop: while (true) {
@@ -9525,7 +9551,8 @@
 
                 grandNode = grandNode.return;
               }
-            } // Now we need to find it's corresponding host fiber in the other
+            }
+            // Now we need to find it's corresponding host fiber in the other
             // tree. To do this we can use getClosestInstanceFromNode, but we
             // need to validate that the fiber is a host instance, otherwise
             // we need to traverse up through the DOM till we find the correct
@@ -9556,6 +9583,7 @@
     }
 
     // 等待渲染完成之后
+    // 批次调用
     batchedUpdates(function () {
       return dispatchEventsForPlugins(domEventName, eventSystemFlags, nativeEvent, ancestorInst);
     });
@@ -9575,39 +9603,50 @@
     var reactEventName = inCapturePhase ? captureName : reactName;
     var listeners = [];
     var instance = targetFiber;
-    var lastHostComponent = null; // Accumulate all instances and listeners via the target -> root path.
+    // 即 currentTarget
+
+    var lastHostComponent = null; 
+    // Accumulate all instances and listeners via the target -> root path.
+    // 通过目标 -> 根路径累积所有实例和监听器
 
     while (instance !== null) {
       var _instance2 = instance,
         stateNode = _instance2.stateNode,
-        tag = _instance2.tag; // Handle listeners that are on HostComponents (i.e. <div>)
+        tag = _instance2.tag; 
+        // Handle listeners that are on HostComponents (i.e. <div>)
 
+      // fiber.tag 为 HostComponent(即Dom)，才提取事件
       if (tag === HostComponent && stateNode !== null) {
-        lastHostComponent = stateNode; // createEventHandle listeners
-
+        lastHostComponent = stateNode; 
+        // createEventHandle listeners
 
         if (reactEventName !== null) {
+          // 从对应的 fiber 节点属性之中，把react事件提取出来
           var listener = getListener(instance, reactEventName);
 
           if (listener != null) {
             listeners.push(createDispatchListener(instance, listener, lastHostComponent));
           }
         }
-      } // If we are only accumulating events for the target, then we don't
+      } 
+      // If we are only accumulating events for the target, then we don't
       // continue to propagate through the React fiber tree to find other
       // listeners.
+
+      // 如果我们只为目标积累事件，那么我们就不会继续通过 React 光纤树传播来寻找其他监听器。
 
 
       if (accumulateTargetOnly) {
         break;
-      } // If we are processing the onBeforeBlur event, then we need to take
+      } 
+      // If we are processing the onBeforeBlur event, then we need to take
 
       // 返回父节点
       instance = instance.return;
     }
 
     return listeners;
-  } 
+  }
   // We should only use this function for:
   // - BeforeInputEventPlugin
   // - ChangeEventPlugin
@@ -11829,7 +11868,7 @@
     if (targetInst) {
       // Don't return HostRoot or SuspenseComponent here.
       return targetInst;
-    } 
+    }
     // If the direct event target isn't a React owned DOM node, we need to look
     // to see if one of its parents is a React owned DOM node.
 
@@ -14292,7 +14331,7 @@
           }
           // Process this update.
 
-          // 将 jsx 函数执行转为 react元素
+          // 将 jsx 函数执行转为 react 元素
           newState = getStateFromUpdate(workInProgress, queue, update, newState, props, instance);
           var callback = update.callback;
 
@@ -15825,7 +15864,7 @@
 
     // start
     function reconcileChildrenArray(returnFiber, currentFirstChild, newChildren, lanes) {
-      debugger
+      // debugger
       // This algorithm can't optimize by searching from both ends since(因为) we
       // don't have backpointers on fibers. I'm trying to see how far we can get
       // with that model. If it ends up not being worth the tradeoffs, we can
@@ -16429,7 +16468,7 @@
 
 
     function reconcileChildFibers(returnFiber, currentFirstChild, newChild, lanes) {
-      debugger
+      // debugger
       // This function is not recursive. 这个函数不是递归的
 
       // If the top level item is an array, we treat it as a set of children,
@@ -28338,7 +28377,7 @@
     try {
       return fn(a);
     } finally {
-      executionContext = prevExecutionContext; 
+      executionContext = prevExecutionContext;
       // If there were legacy sync updates, flush them at the end of the outer
       // most batchedUpdates-like method.
 
