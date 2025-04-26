@@ -14566,6 +14566,7 @@
   }
 
   // class组件相关
+  // 实现接口
   var classComponentUpdater = {
     isMounted: isMounted,
     enqueueSetState: function (inst, payload, callback) {
@@ -23506,7 +23507,7 @@
   }
 
   function completeWork(current, workInProgress, renderLanes) {
-    console.log('completeWork', workInProgress?.type)
+    // console.log('completeWork', workInProgress?.type)
     var newProps = workInProgress.pendingProps;
     // Note: This intentionally doesn't check if we're hydrating because comparing
     // to the current tree provider fiber is just as fast and less error-prone.
@@ -29803,7 +29804,7 @@
     var dummyFiber = null;
 
     beginWork$1 = function (current, unitOfWork, lanes) {
-      console.log('beginWork', unitOfWork?.type)
+      // console.log('beginWork', unitOfWork?.type)
       // If a component throws an error, we replay it again in a synchronously
       // dispatched event, so that the debugger will treat it as an uncaught
       // error See ReactErrorUtils for more information.

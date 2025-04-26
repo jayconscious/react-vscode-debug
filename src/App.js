@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 import ParentAndChild from "./components/ParentAndChild";
+import ScrollList from "./components/ScrollList";
+
+
 
 export default function App() {
   const timer = useRef()
@@ -20,11 +23,12 @@ export default function App() {
 
   return (
     <>
-      <button onClick={() => sendCode()}>hahaha</button>
+      {/* <button onClick={() => sendCode()}>hahaha</button>
       <br />
       <button onClick={() => onShowClick()}>{isShow ? '消失' : '展示'}</button>
 
-      {isShow && <ParentAndChild />}
+      {isShow && <ParentAndChild />} */}
+      <ScrollList />
     </>
   )
 }
