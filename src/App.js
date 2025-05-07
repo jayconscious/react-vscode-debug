@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 import ParentAndChild from "./components/ParentAndChild";
 import ScrollList from "./components/ScrollList";
+import UseCallbackDemo1 from "./components/UseCallbackDemo1";
+import UseCallbackDemo2 from "./components/useCallbackDemo/use";
 
 
 
@@ -28,7 +30,9 @@ export default function App() {
       <button onClick={() => onShowClick()}>{isShow ? '消失' : '展示'}</button>
 
       {isShow && <ParentAndChild />} */}
-      <ScrollList />
+      {/* <ScrollList /> */}
+      {/* <UseCallbackDemo1 /> */}
+      <UseCallbackDemo2 />
     </>
   )
 }
