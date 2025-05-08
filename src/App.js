@@ -4,6 +4,7 @@ import ParentAndChild from "./components/ParentAndChild";
 import ScrollList from "./components/ScrollList";
 import UseCallbackDemo1 from "./components/UseCallbackDemo1";
 import UseCallbackDemo2 from "./components/useCallbackDemo/use";
+import Answer from './components/answer'
 
 
 
@@ -32,7 +33,12 @@ export default function App() {
       {isShow && <ParentAndChild />} */}
       {/* <ScrollList /> */}
       {/* <UseCallbackDemo1 /> */}
-      <UseCallbackDemo2 />
+      {/* <UseCallbackDemo2 /> */}
+
+      <Answer />
+
+      
+
     </>
   )
 }
