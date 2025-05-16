@@ -1,9 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 
 export default function Parent() {
     console.log('Parent render');
+
+    useLayoutEffect(() => {
+      console.log('Parent useLayoutEffect cb');
+      return () => console.log('Parent useLayoutEffect cleanup');
+    }, []);
+    
     useEffect(() => {
-      console.log('Parent useEffect');
+      console.log('Parent useEffect cb');
       return () => console.log('Parent cleanup');
     }, []);
   
@@ -17,8 +23,14 @@ export default function Parent() {
   
   function Child() {
     console.log('Child render');
+
+    useLayoutEffect(() => {
+      console.log('Child useLayoutEffect cb');
+      return () => console.log('Child useLayoutEffect cleanup');
+    }, []);
+
     useEffect(() => {
-      console.log('Child useEffect');
+      console.log('Child useEffect cb');
       return () => console.log('Child cleanup');
     }, []);
   

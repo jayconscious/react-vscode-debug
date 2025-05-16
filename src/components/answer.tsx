@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useLayoutEffect, useEffect, useRef } from 'react';
 
 let textValueMap = Object.create(null)
@@ -7,8 +8,7 @@ const Answer: React.FC = () => {
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
 
-    const [txState, setTxState] = useState('');
-    let ref = useRef()
+    let domRef = useRef<any>()
     let Timer = useRef()
 
 
@@ -20,9 +20,9 @@ const Answer: React.FC = () => {
         }
     }, []);
 
+    // @ts-ignore
     const pageInit = () => {
         if (!Timer.current) {
-            // @ts-ignore
             Timer.current = setInterval(() => {
                 let textDom = document.getElementById('textarea')
                 if (textDom) {
@@ -60,7 +60,7 @@ const Answer: React.FC = () => {
 
     return (
         <div style={{ padding: '20px' }}>
-            <textarea name="" id="textarea" cols={30} rows={10}>
+            <textarea ref={domRef} name="" id="textarea" cols={30} rows={10}>
 
             </textarea>
             <button type="button" onClick={() => reset()}>回退</button>

@@ -13,7 +13,7 @@ export interface ChildRef {
     getValue: () => number;
 }
 
-// 使用 forwardRef 包装子组件
+// 使用 forwardRef 包装子组件，明确指定 ref 类型
 const ChildComponent = forwardRef<ChildRef, ChildProps>((props, ref) => {
     const [count, setCount] = useState(props.initialValue || 0);
 
@@ -52,26 +52,34 @@ const ChildComponent = forwardRef<ChildRef, ChildProps>((props, ref) => {
 
 // 父组件
 const ImperativeHandleDemo: React.FC = () => {
-    // 创建 ref 来引用子组件
+    // 创建 ref 来引用子组件，明确指定类型
     const childRef = useRef<ChildRef>(null);
     const [parentCount, setParentCount] = useState(0);
 
     // 父组件中调用子组件方法的函数
     const handleIncrement = () => {
-        childRef.current?.increment();
+        if (childRef.current) {
+            childRef.current.increment();
+        }
     };
 
     const handleDecrement = () => {
-        childRef.current?.decrement();
+        if (childRef.current) {
+            childRef.current.decrement();
+        }
     };
 
     const handleReset = () => {
-        childRef.current?.reset();
+        if (childRef.current) {
+            childRef.current.reset();
+        }
     };
 
     const handleGetValue = () => {
-        const value = childRef.current?.getValue();
-        setParentCount(value || 0);
+        if (childRef.current) {
+            const value = childRef.current.getValue();
+            setParentCount(value);
+        }
     };
 
     return (

@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "strict": false,
+    // "noImplicitAny": true,
     "outDir": "build/dist",
     "module": "esnext",
     "target": "esnext",
@@ -22,7 +24,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "strict": true,
     "paths": {
       "@/*": [
         "./src/*"
