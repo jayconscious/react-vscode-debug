@@ -18,6 +18,7 @@ function Counter() {
     const handleReset = () => {
       setCount(0);
     };
+    
     return (
       <div>
         <p>Count: {count}</p>

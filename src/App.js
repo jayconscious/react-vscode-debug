@@ -5,6 +5,7 @@ import ScrollList from "./components/ScrollList";
 import UseCallbackDemo1 from "./components/UseCallbackDemo1";
 import UseCallbackDemo2 from "./components/useCallbackDemo/use";
 import Answer from './components/answer'
+import RefDemo from './components/refDemo'
 
 
 
@@ -37,10 +38,9 @@ export default function App() {
 
       {/* <Answer /> */}
 
-      <button onClick={() => onShowClick()}>{isShow ? '消失' : '展示'}</button>
-      {isShow && <UseEffectUseLayoutEffect />}
-
-
+      {/* <button onClick={() => onShowClick()}>{isShow ? '消失' : '展示'}</button>
+      {isShow && <UseEffectUseLayoutEffect />} */}
+      <RefDemo />
 
     </>
   )
