@@ -6,7 +6,8 @@ import UseCallbackDemo1 from "./components/UseCallbackDemo1";
 import UseCallbackDemo2 from "./components/useCallbackDemo/use";
 import Answer from './components/answer'
 import RefDemo from './components/refDemo'
-
+import ToApp from './moreComponents/toApp'
+import Memo from './components/memo'
 
 
 export default function App() {
@@ -40,7 +41,13 @@ export default function App() {
 
       {/* <button onClick={() => onShowClick()}>{isShow ? '消失' : '展示'}</button>
       {isShow && <UseEffectUseLayoutEffect />} */}
-      <RefDemo />
+      {/* <RefDemo /> */}
+
+      {/* <ToApp /> */}
+
+      <Memo />
+
+
 
     </>
   )
