@@ -8,6 +8,8 @@ import Answer from './components/answer'
 import RefDemo from './components/refDemo'
 import ToApp from './moreComponents/toApp'
 import Memo from './components/memo'
+import FlushSyncDemo from "./components/flushSyncDemo";
+import HookState from "./moreComponents/hookState";
 
 
 export default function App() {
@@ -45,7 +47,11 @@ export default function App() {
 
       {/* <ToApp /> */}
 
-      <Memo />
+      {/* <Memo /> */}
+
+      {/* <FlushSyncDemo /> */}
+
+      <HookState />
 
 
 

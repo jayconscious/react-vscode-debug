@@ -6154,6 +6154,7 @@
       currentUpdatePriority = previousPriority;
     }
   }
+  // 
   function higherEventPriority(a, b) {
     return a !== 0 && a < b ? a : b;
   }
@@ -17274,14 +17275,13 @@
 
   // TODO: 
   function mountWorkInProgressHook() {
-
-    // hook 定义 
+    // hook定义 
     var hook = {
-      memoizedState: null,
-      baseState: null,
-      baseQueue: null,
-      queue: null,
-      next: null
+      memoizedState: null, // 当前状态: 保持在内存中的局部状态.
+      baseState: null,     // 基状态: hook.baseQueue中所有update对象合并之后的状态.
+      baseQueue: null,     // 基队列: 存储update对象的环形链表, 只包括高于本次渲染优先级的update对象
+      queue: null,         // 更新队列: 存储update对象的环形链表, 包括所有优先级的update对象.
+      next: null           // next指针: next指针, 指向链表中的下一个hook.
     };
 
     // 将hook插入fiber.memoizedState链表末尾
@@ -17395,6 +17395,8 @@
       lastRenderedState: initialState
     };
     hook.queue = queue;
+    
+    // currentlyRenderingFiber$1 当前的fiber
     var dispatch = queue.dispatch = dispatchReducerAction.bind(null, currentlyRenderingFiber$1, queue);
     return [hook.memoizedState, dispatch];
   }
@@ -18335,6 +18337,7 @@
 
     if (isRenderPhaseUpdate(fiber)) {
       enqueueRenderPhaseUpdate(queue, update);
+      // 先加入到 hook 的队列之中
     } else {
       var root = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
 
@@ -18391,6 +18394,7 @@
           }
 
           try {
+            // currentState => preState
             var currentState = queue.lastRenderedState;
             // 拿到执行完自定义的逻辑的state, eager(急切的)
             var eagerState = lastRenderedReducer(currentState, action);
@@ -27449,6 +27453,7 @@
     ReactCurrentOwner$2 = ReactSharedInternals.ReactCurrentOwner,
     ReactCurrentBatchConfig$3 = ReactSharedInternals.ReactCurrentBatchConfig,
     ReactCurrentActQueue$1 = ReactSharedInternals.ReactCurrentActQueue;
+
   var NoContext =
     /*             */
     0;
@@ -27470,6 +27475,9 @@
   var RootDidNotComplete = 6;
 
   // Describes where we are in the React execution stack
+  // 描述我们在 React 执行堆栈中的位置
+  // Tip: 会作为一个判断基准，同步渲染还是异步渲染。
+
   var executionContext = NoContext;
 
   // The root we're working on
@@ -30447,7 +30455,7 @@
     // 作为动态的工作单元的属性
     this.pendingProps = pendingProps;
     this.memoizedProps = null;
-    this.updateQueue = null;
+    this.updateQueue = null; // hook 相关存储
     this.memoizedState = null;
     this.dependencies = null;
     this.mode = mode;

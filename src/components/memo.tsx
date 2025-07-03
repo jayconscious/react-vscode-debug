@@ -24,7 +24,6 @@ const B = (props: any) => {
         </div>
         {props.children}
     </>)
-
 }
 
 
