@@ -16957,12 +16957,14 @@
   var didScheduleRenderPhaseUpdateDuringThisPass = false;
   // Counts the number of useId hooks in this component.
 
-  var localIdCounter = 0; // Used for ids that are generated completely client-side (i.e. not during
+  var localIdCounter = 0; 
+  // Used for ids that are generated completely client-side (i.e. not during
   // hydration). This counter is global, so client ids are not stable across
   // render attempts.
 
   var globalClientIdCounter = 0;
-  var RE_RENDER_LIMIT = 25; // In DEV, this is the name of the currently executing primitive hook
+  var RE_RENDER_LIMIT = 25; 
+  // In DEV, this is the name of the currently executing primitive hook
 
   var currentHookNameInDev = null; // In DEV, this list ensures that hooks are called in the same order between renders.
   // The list stores the order of hooks used during the initial render (mount).
@@ -17084,7 +17086,7 @@
   // TODO: 当 FunctionComponent 进入 render 阶段的 beginWork 时，会调用 renderWithHooks 方法。
   function renderWithHooks(current, workInProgress, Component, props, secondArg, nextRenderLanes) {
     renderLanes = nextRenderLanes;
-    currentlyRenderingFiber$1 = workInProgress;
+    currentlyRenderingFiber$1 = workInProgress; // 当前正在构造的 fiber, 等同于 workInProgress
 
     {
       hookTypesDev = current !== null ? current._debugHookTypes : null;
@@ -17093,6 +17095,7 @@
       ignorePreviousDependencies = current !== null && current.type !== workInProgress.type;
     }
 
+    // 清除当前fiber的遗留状态
     workInProgress.memoizedState = null;
     workInProgress.updateQueue = null;
     workInProgress.lanes = NoLanes;
@@ -17109,6 +17112,7 @@
     // so memoizedState would be null during updates and mounts.
 
     // 区分 current 的阶段使用不同的 hook 方法
+    // 调用function,生成子级 ReactElement 对象
     {
       if (current !== null && current.memoizedState !== null) {
         ReactCurrentDispatcher$1.current = HooksDispatcherOnUpdateInDEV;
@@ -17125,6 +17129,7 @@
     }
 
     // TODO: 
+    // 执行function函数, 其中进行分析Hooks的使用
     var children = Component(props, secondArg);
     // Check if there was a render phase update
 
@@ -17173,17 +17178,20 @@
     } // This check uses currentHook so that it works the same in DEV and prod bundles.
     // hookTypesDev could catch more cases (e.g. context) but only in DEV bundles.
 
-
+    // 重置全局变量,并返回
+    // 执行function之后, 还原被修改的全局变量, 不影响下一次调用
     var didRenderTooFewHooks = currentHook !== null && currentHook.next !== null;
     renderLanes = NoLanes;
     currentlyRenderingFiber$1 = null;
     currentHook = null;
     workInProgressHook = null;
-
+    // currentHook 与 workInProgressHook: 
+    // 分别指向 current.memoizedState 和 workInProgress.memoizedState
     {
       currentHookNameInDev = null;
       hookTypesDev = null;
-      hookTypesUpdateIndexDev = -1; // Confirm that a static flag was not added or removed since the last
+      hookTypesUpdateIndexDev = -1; 
+      // Confirm that a static flag was not added or removed since the last
       // render. If this fires, it suggests that we incorrectly reset the static
       // flags in some other part of the codebase. This has happened before, for
       // example, in the SuspenseList implementation.
@@ -17274,6 +17282,7 @@
   }
 
   // TODO: 
+  // 构造hook
   function mountWorkInProgressHook() {
     // hook定义 
     var hook = {
@@ -17284,7 +17293,7 @@
       next: null           // next指针: next指针, 指向链表中的下一个hook.
     };
 
-    // 将hook插入fiber.memoizedState链表末尾
+    // 将 hook 插入 fiber.memoizedState 链表末尾
     if (workInProgressHook === null) {
       // This is the first hook in the list
       currentlyRenderingFiber$1.memoizedState = workInProgressHook = hook;
@@ -18470,7 +18479,8 @@
     }
 
     queue.pending = update;
-  } // TODO: Move to ReactFiberConcurrentUpdates?
+  } 
+  // TODO: Move to ReactFiberConcurrentUpdates?
 
 
   function entangleTransitionUpdate(root, queue, lane) {
@@ -21339,6 +21349,7 @@
     return finishClassComponent(null, workInProgress, Component, true, hasContext, renderLanes);
   }
 
+  // 
   function mountIndeterminateComponent(_current, workInProgress, Component, renderLanes) {
     resetSuspendedCurrentOnMountInLegacyMode(_current, workInProgress);
     var props = workInProgress.pendingProps;

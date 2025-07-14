@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 
-export default function hookState() {
-    const [hookState, setHookState] = useState(0)
+export default function hookStateComponent() {
+    const [hookState, setHookState] = useState(() => {
+        debugger
+        return 0
+    })
 
     return (
         <>
@@ -9,9 +12,7 @@ export default function hookState() {
                 count: {hookState}
             </div>
             <button onClick={() => {
-
                 setHookState(preState => {
-                    debugger
                     return preState + 1
                 })
             }}>

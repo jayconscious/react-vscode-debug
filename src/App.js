@@ -9,24 +9,24 @@ import RefDemo from './components/refDemo'
 import ToApp from './moreComponents/toApp'
 import Memo from './components/memo'
 import FlushSyncDemo from "./components/flushSyncDemo";
-import HookState from "./moreComponents/hookState";
+import HookStateComponent from "./moreComponents/hookStateComponent";
 
 
 export default function App() {
-  const timer = useRef()
-  let [seconds, setSeconds] = useState(4)
-  const [disabled, setDisabled] = useState(true)
-  let [isShow, setIsShow] = useState(true)
+  // const timer = useRef()
+  // let [seconds, setSeconds] = useState(4)
+  // const [disabled, setDisabled] = useState(true)
+  // let [isShow, setIsShow] = useState(true)
 
-  const sendCode = () => {
-    // debugger
-    console.log('sendCode 111')
-  }
+  // const sendCode = () => {
+  //   // debugger
+  //   console.log('sendCode 111')
+  // }
 
-  const onShowClick = () => {
-    let newShowState = !isShow
-    setIsShow(newShowState)
-  }
+  // const onShowClick = () => {
+  //   let newShowState = !isShow
+  //   setIsShow(newShowState)
+  // }
 
   return (
     <>
@@ -51,7 +51,7 @@ export default function App() {
 
       {/* <FlushSyncDemo /> */}
 
-      <HookState />
+      <HookStateComponent />
 
 
 
